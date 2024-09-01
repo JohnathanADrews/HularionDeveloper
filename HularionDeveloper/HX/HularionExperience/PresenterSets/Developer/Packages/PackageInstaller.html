@@ -1,0 +1,286 @@
+﻿<!--
+MIT License
+
+Copyright (c) 2023 Johnathan A Drews
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+-->
+
+<hx h-proxy="setContextKey" />
+<hx h-proxy="loadPackageDetails" />
+
+
+<div class="packageDetail">
+    <div><label class="packageDetailItem titleItem">Name: </label><label h-handle="packageName"></label></div>
+    <div><label class="packageDetailItem titleItem">Description: </label><label h-handle="packageDescription"></label></div>
+    <div><label class="packageDetailItem titleItem">Brand: </label><label h-handle="packageBrand"></label></div>
+    <div><label class="packageDetailItem titleItem">Product: </label><label h-handle="packageProduct"></label></div>
+    <div><label class="packageDetailItem titleItem">Package: </label><label h-handle="packageKey"></label><label>@</label><label h-handle="packageVersion"></label></div>
+</div>
+
+<div class="tags" h-handle="tags">
+    <label class="tagHeader titleItem">Tags:</label>
+    <label h-clone="tag" class="tag"></label>
+</div>
+
+<div class="licenseAgree">
+    <hx h-handle="licenseViewer" h-presenter="hxDeveloper.Presenter/LicenseViewer" />
+    <input type="checkbox" h-handle="licenseAgree" />
+    <label>I have read and agree to the license agreement for this package and all of its dependencies.</label>
+</div>
+<hx h-presenter="hxCore.Control.Presenter/Button" h-handle="installButton" />
+<hx h-presenter="hxCore.Control.Presenter/WindowPane" h-handle="installIssue" />
+<div h-clone="installIssue" class="installIssue"><div><p h-handle="installIssueContent"></p></div></div>
+
+
+<div class="itemGroup" h-handle="applications">
+    <div class="titleItem"><label>Applications:</label></div>
+    <div h-clone="application" class="application groupItem">
+        <div class="applicationContainer">
+            <div><label h-handle="name" class="titleItem"></label></div>
+            <div><label h-handle="description"></label></div>
+        </div>
+    </div>
+</div>
+
+<div class="itemGroup" h-handle="contributors">
+    <div class="titleItem"><label>Contributors:</label></div>
+    <div h-clone="contributor" class="contributor groupItem">
+        <div><label h-handle="name"></label></div>
+        <div><label h-handle="role"></label></div>
+        <div><label h-handle="link" style="user-select:text;"></label></div>
+    </div>
+</div>
+
+<div class="links itemGroup" h-handle="links">
+    <div class="titleItem"><label>Links:</label></div>
+    <div h-clone="link" class="link groupItem">
+        <div><label h-handle="name"></label></div>
+        <div><label h-handle="link" style="user-select:text;"></label></div>
+        <div h-handle="links" class="links"></div>
+    </div>
+</div>
+
+<div class="dependencyContainer itemGroup">
+    <div class="dependenciesHeader"><label>Dependencies</label></div>
+    <div h-handle="installDependencies" class="installDependencies">
+
+    </div>
+</div>
+
+
+<script>
+
+    function PackageInstaller() {
+        this.contextKey = null;
+        this.detail = null;
+    }
+
+    PackageInstaller.prototype = {
+
+        start: function () {
+
+            var t = this;
+            //console.log("PackageInstaller - ", t);
+
+            t.installButton.proxy.setText("Install");
+            t.installButton.proxy.setWidth(90);
+            t.installButton.proxy.setHeight(24);
+            t.installButton.publisher.Clicked.subscribe(() => {
+                t.licenseAgree[0];
+                if (t.licenseAgree[0].checked !== true) {
+                    var clone = t.hularion.createClone("installIssue");
+                    t.installIssue.proxy.setTitle("Error");
+                    clone.handles.installIssueContent.html("The package can only be installed after the license is agreed to and the license checkbox is checked.");
+                    t.installIssue.proxy.setContent(clone.view);
+                    t.installIssue.proxy.show();
+                    return;
+                }
+                else {
+                    var request = {
+                        contextKey: t.contextKey,
+                        packageKey: t.packageKey.html(),
+                        version: t.packageVersion.html(),
+                        source: {
+                            //type: "package",
+                            //structure: "disk",
+                            location: t.detail.source
+                        }
+                    };
+                    console.log("PackageInstaller.start t.installButton.publisher.Clicked request - ", request);
+                    t.hularion.router.request("hularion/state/context/packages/install", request).then(response => {
+                        console.log("PackageInstaller.start t.installButton.publisher.Clicked response - ", response);
+                    });
+                }
+            });
+
+        },
+
+        setContextKey: function (contextKey) {
+            this.contextKey = contextKey;
+        },
+
+        loadPackageDetails: function (packageKey, version) {
+            var t = this;
+
+            console.log("PackageInstaller.loadPackageDetails - ", packageKey, version, t);
+            return t.hularion.router.request("hularion/state/context/packages/install/details", { contextKey: t.contextKey, packageKey: packageKey, packageVersion: version }).then(response => {
+                console.log("PackageInstaller.loadPackageDetails response - ", response);
+
+                t.detail = response.detail;
+                t.packageKey.html(packageKey);
+                t.packageVersion.html(version);
+                t.packageName.html(response.detail.packageName);
+                t.packageDescription.html(response.detail.summary.description);
+                t.packageBrand.html(response.detail.summary.brand);
+                t.packageProduct.html(response.detail.summary.productKey);
+
+                t.licenseViewer.proxy.setLicense({
+                    license: response.detail.summary.license,
+                    agreementRequired: response.detail.summary.licenseAgreementIsRequired,
+                    alreadyInstalled: false,
+                    packageKey: packageKey,
+                    version: version
+                });
+
+                if (response.detail.summary.tags.length == 0) {
+                    t.tags.css("display", "none");
+                }
+                response.detail.summary.tags.forEach(tag => {
+                    var clone = t.hularion.createClone("tag");
+                    clone.view.html(tag);
+                    t.tags.append(clone.view);
+                });
+
+                if (response.detail.summary.applications.length == 0) {
+                    t.applications.css("display", "none");
+                }
+                response.detail.summary.applications.forEach(app => {
+                    var clone = t.hularion.createClone("application");
+                    clone.handles.name.html(app.name);
+                    clone.handles.description.html(app.description);
+                    t.applications.append(clone.view);
+                });
+
+                if (response.detail.summary.contributors.length == 0) {
+                    t.contributors.css("display", "none");
+                }
+                response.detail.summary.contributors.forEach(contributor => {
+                    var clone = t.hularion.createClone("contributor");
+                    clone.handles.name.html(contributor.name);
+                    clone.handles.role.html(contributor.role);
+                    if (contributor.links.length > 0) {
+                        clone.handles.link.html(contributor.links[0].url);
+                    };
+                    t.contributors.append(clone.view);
+                });
+
+                if (response.detail.summary.links.length == 0) {
+                    t.links.css("display", "none");
+                }
+                response.detail.summary.links.forEach(link => {
+                    var clone = t.hularion.createClone("link");
+                    clone.handles.name.html(link.name);
+                    clone.handles.link.html(link.url);
+                    t.links.append(clone.view);
+                });
+
+                var instance = hxDeveloper.Presenter.presenters.PackageInstallerDependency.create();
+                instance.proxy.setPackage(response.detail, 0, (depth, summary) => {
+                    summary.view.css("margin-left", (depth * 20) + "px");
+                    t.installDependencies.append(summary.view);
+                });
+
+            });
+        }
+    }
+
+</script>
+
+<style>
+
+    .this {
+        height:inherit;
+        color: black;
+    }
+
+    .itemGroup {
+        margin-top: 10px;
+        width: 100%;
+        display: inline-block;
+    }
+
+        .itemGroup > * {
+            float: left;
+        }
+
+    .groupItem {
+        display: inline-block;
+        padding: 10px;
+        margin-top: 5px;
+        margin-right: 10px;
+        background: linear-gradient(0deg, rgb(200,200,200) 0%, white 80%, rgb(200,200,200) 100%);
+    }
+
+    .titleItem {
+        font-weight: bold;
+        width: 100%;
+    }
+
+
+    .dependencyContainer > * {
+        width: calc(100% - 20px);
+    }
+
+    .dependenciesHeader {
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    .installDependencies {
+    }
+
+        .installDependencies > * {
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+
+    .packageDetail {
+    }
+
+    .tags {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+        .tags > .tag {
+            margin-right: 10px;
+        }
+
+    .tagHeader {
+        margin-right: 10px;
+    }
+
+    .packageDetailItem {
+        font-weight: bold;
+    }
+
+    .installIssue {
+        background-color: white;
+        color: black;
+        width: calc(100% - 10px);
+        overflow-y: scroll;
+        height: inherit;
+        font-size: 20px;
+    }
+
+        .installIssue > * {
+            padding: 10px;
+        }
+</style>
+

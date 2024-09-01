@@ -1,0 +1,155 @@
+﻿<!--
+MIT License
+
+Copyright (c) 2023 Johnathan A Drews
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+-->
+
+<hx h-publisher="RunApplication" />
+
+<hx h-proxy="setPackages" />
+<hx h-proxy="setContextKey" />
+
+<!--<h1 class="header">Packages Viewer</h1>-->
+
+<div class="packagesContainer" h-handle="packagesContainer"></div>
+<div class="expandedContainer" h-handle="expandedContainer" style="display:none;"></div>
+
+<script>
+
+    function MyPackagesViewer() {
+        this.packages = null;
+        this.contextKey = null;
+    }
+
+    MyPackagesViewer.prototype = {
+
+        start: function () {
+
+            var t = this;
+            //console.log("MyPackagesViewer - ", t);
+        },
+
+        setContextKey: function (contextKey) {
+            this.contextKey = contextKey;
+        },
+
+        setPackages: function (packages) {
+            var t = this;
+
+            t.packages = packages;
+            if (t.packages == null) { t.packages = []; }
+            t.packages.forEach(package => {
+                //console.log("MyPackagesViewer.setPackages - ",  package);
+                var summary = hxDeveloper.Presenter.presenters.PackageSummary.create();
+                summary.proxy.setContextKey(t.contextKey);
+                summary.proxy.setPackage(package);
+                summary.view.addClass("packageSummary");
+                if (package.stage === "Package") {
+                    summary.view.css("background", "linear-gradient(45deg, white 0%, white 90%, rgb(0,100,200) 100%)");
+                }
+                if (package.stage === "Project") {
+                    summary.view.css("background", "linear-gradient(45deg, white 0%, white 90%, rgb(0,200,100) 100%)");
+                }
+                summary.publisher.RemoveFromList.subscribe((o) => {
+                    //console.log("MyPackagesViewer - RemoveFromList - ", o, package);
+                    if (t.contextKey != null) {
+                        t.hularion.router.request("hularion/state/context/packages/delete", { contextKey: t.contextKey, packagekey: package.key }).then(response => {
+                            //console.log("PackagesViewer - RemoveFromList - ", response, package);
+                            if (response.isFailure === false) {
+                                summary.view.remove();
+                            }
+                        });
+                    }
+                });
+                summary.publisher.ExpandView.subscribe((o) => {
+                    //console.log("MyPackagesViewer - ExpandView - ", o, package);
+                    var expanded = hxDeveloper.Presenter.presenters.ExpandedPackageView.create();
+                    expanded.proxy.setCanRunApplication(true);
+                    expanded.proxy.setPackage(package);
+                    expanded.publisher.Closed.subscribe(() => {
+                        t.expandedContainer.empty();
+                        t.packagesContainer.css("display", "");
+                        t.expandedContainer.css("display", "none");
+                    });
+                    expanded.publisher.RunApplication.subscribe((o, app) => {
+                        t.runApplication(app);
+                    });
+                    t.expandedContainer.empty();
+                    t.expandedContainer.append(expanded.view);
+                    t.expandedContainer.css("display", "");
+                    t.packagesContainer.css("display", "none");
+                });
+                summary.publisher.RunApplication.subscribe((o, app) => {
+                    //console.log("PackageSummary - RunApplication - ", o, app);
+                    t.runApplication(app);
+                });
+                summary.proxy.hideAllButtons();
+                summary.proxy.showExpandButton();
+                //summary.proxy.showRunButton();
+                summary.proxy.showRemoveButton();
+                t.packagesContainer.append(summary.view);
+            });
+
+        },
+
+        runApplication: function (app) {
+            var t = this;
+            console.log("MyPackagesViewer - Run App clicked - ", t, app);
+            var appInfo = {
+                packageKey: app.package.key,
+                version: app.package.version,
+                applicationKey: app.application.key,
+                applicationTitle: app.application.title,
+                presenterSet: app.application.presenterSet,
+                entryPresenter: app.application.entryPresenter,
+                contextKey: t.contextKey,
+                isPackage: app.package.source.type == "Package",
+                isProject: app.package.source.type == "Project",
+                projectLocation: app.package.source.location
+            };
+            t.hularion.publisher.RunApplication.publish(appInfo);
+            //console.log("PackageSummary Add - hularion/state/context/packages/add - req", req);
+        }
+    }
+
+</script>
+
+
+<style>
+    .this {
+        user-select: none;
+        padding: 4px;
+    }
+
+    .packageItem {
+        width: 100%;
+    }
+
+    .packagesContainer {
+        display: inline-block;
+    }
+
+    .packageSummary {
+        border-style: solid;
+        border-width: 1px;
+        margin-top: 10px;
+        margin-right: 10px;
+        width: 320px;
+        float: left;
+        height: 240px;
+        overflow-y: scroll;
+    }
+</style>
+
+<style h-style-category-key="Theme" h-style-category-value="Light">
+</style>
+<style h-style-category-key="Theme" h-style-category-value="Dark">
+</style>
+

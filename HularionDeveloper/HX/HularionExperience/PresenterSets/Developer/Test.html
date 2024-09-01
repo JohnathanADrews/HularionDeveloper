@@ -1,0 +1,117 @@
+﻿<!--
+MIT License
+
+Copyright (c) 2023 Johnathan A Drews
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+-->
+
+<!--<hx h-graphic="GraphicBlue=>this.background-image" />-->
+<!--<img h-graphic="GraphicRed"  />-->
+
+<hx h-graphic="GraphicBlue=>handle/graphics.blue" />
+<hx h-graphic="GraphicRed=>handle/graphics.red" />
+
+<div class="title">
+    <label>Profile for</label>
+    <label h-handle="titleContextName"></label>
+</div>
+
+<div h-clone="cloneX"><label h-handle="name"></label></div>
+
+
+<div h-clone="cloneZ">
+    <label h-handle="name"></label>
+    <hx h-clone-instance="cloneX" h-handle="cloneXZ1" />
+</div>
+
+<hx h-clone-instance="cloneX" h-handle="cloneX2" />
+
+<hx h-clone-instance="cloneZ" h-handle="cloneZ1" />
+
+
+<div h-template="templateYA">
+    <label>YALabel</label>
+    <label h-handle="name"></label>
+    <hx h-presenter="hxCore.Control.Presenter/Button" h-handle="button1" />
+    <hx h-clone-instance="cloneX" h-handle="cloneX3" />
+</div>
+
+<div h-template="templateY" h-method="templateYCall">
+    <label h-handle="name"></label>
+    <hx h-presenter="hxCore.Control.Presenter/Button" h-handle="button1" />
+    <hx h-clone-instance="cloneX" h-handle="cloneX3" />
+    <hx h-template-instance="templateYA" h-handle="templateYA" />
+
+    <br />
+    <hx h-handle="menu" h-presenter="hxCore.Control.Presenter/Menu">
+        <hx h-handle="menuItems.view" h-component="hxCore.Control.Presenter/MenuItem=>AddMenuItemHandler" h-start-parameter='{"name": "View"}' h-subscribe="Clicked=>testClick">
+            <hx h-handle="menuItems.view.Profile" h-component="hxCore.Control.Presenter/MenuItem=>AddMenuItemHandler" h-start-parameter='{"name": "Profile"}' h-subscribe="Clicked=>testClick"></hx>
+        </hx>
+        <hx h-handle="menuItems.package" h-component="hxCore.Control.Presenter/MenuItem=>AddMenuItemHandler" h-start-parameter='{"name": "Package"}'>
+            <hx h-handle="menuItems.viewMyPackages" h-component="hxCore.Control.Presenter/MenuItem=>AddMenuItemHandler" h-start-parameter='{"name": "My Packages"}' />
+            <hx h-handle="menuItems.viewPackages" h-component="hxCore.Control.Presenter/MenuItem=>AddMenuItemHandler" h-start-parameter='{"name": "View Packages"}' />
+            <hx h-handle="menuItems.viewPackageSources" h-component="hxCore.Control.Presenter/MenuItem=>AddMenuItemHandler" h-start-parameter='{"name": "View Sources"}' />
+            <hx h-handle="menuItems.buildPackage" h-component="hxCore.Control.Presenter/MenuItem=>AddMenuItemHandler" h-start-parameter='{"name": "Build Package"}' />
+        </hx>
+        <hx h-handle="menuItems.applications" h-component="hxCore.Control.Presenter/MenuItem=>AddMenuItemHandler" h-start-parameter='{"name": "Apps"}'>
+            <hx h-handle="menuItems.viewMyApplications" h-component="hxCore.Control.Presenter/MenuItem=>AddMenuItemHandler" h-start-parameter='{"name": "My Apps"}' />
+        </hx>
+    </hx>
+</div>
+
+<hx h-template-instance="templateY" h-handle="templateY2" />
+
+<script>
+
+    function Test() {
+    }
+
+    Test.prototype = {
+
+        start: function (options) {
+
+            var t = this;
+            console.log("Test - ",  t);
+
+            var cx1 = t.hularion.createClone("cloneX");
+
+            console.log("Test - cx1 ", cx1);
+
+            t.cloneX2.handles.name.html("cloneX2 name");
+
+
+            //var ty1 = t.hularion.createTemplate("templateY");
+            //console.log("Test - ty1 ", ty1);
+
+            t.templateY2.handles.name.html("templateY2");
+            t.templateY2.handles.cloneX3.handles.name.html("templateY2 - CLoneX3");
+
+            t.templateY2.handles.button1.proxy.setText("button");
+            t.templateY2.handles.button1.proxy.setWidth(100);
+
+            t.cloneZ1.view.attr("style", "padding:10px;background-color:green;");
+            t.cloneZ1.handles.name.html("cloneZ1");
+            t.cloneZ1.handles.cloneXZ1.handles.name.html("cloneXZ1");
+
+        },
+
+        templateYCall: function (template, p1, p2, p3) {
+            var t = this;
+            console.log("Test.templateYCall - ", t, template, p1, p2, p3);
+        },
+
+        testClick: function (object, parameter) {
+            var t = this;
+            console.log("Test.testClick - ", t, object, parameter);
+        }
+    }
+
+
+</script>
+

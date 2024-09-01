@@ -1,0 +1,374 @@
+﻿<!--
+MIT License
+
+Copyright (c) 2023 Johnathan A Drews
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+-->
+
+<hx h-publisher="AddToList" />
+<hx h-publisher="Install" />
+<hx h-publisher="Uninstall" />
+<hx h-publisher="RemoveFromList" />
+<hx h-publisher="ExpandView" />
+<hx h-publisher="RunApplication" />
+<hx h-proxy="setPackage" />
+<hx h-proxy="setContextKey" />
+<hx h-proxy="showAllButtons" />
+<hx h-proxy="showAddButton" />
+<hx h-proxy="showInstallButton" />
+<hx h-proxy="showUninstallButton" />
+<hx h-proxy="showRemoveButton" />
+<hx h-proxy="showExpandButton" />
+<!--<hx h-proxy="showRunButton" />-->
+<hx h-proxy="hideAllButtons" />
+<hx h-proxy="hideAddButton" />
+<hx h-proxy="hideInstallButton" />
+<hx h-proxy="hideUninstallButton" />
+<hx h-proxy="hideRemoveButton" />
+<hx h-proxy="hideExpandButton" />
+<!--<hx h-proxy="hideRunButton" />-->
+
+
+<div class="packageName"><label h-handle="name"></label></div>
+<div class="packageDescription"><label h-handle="description"></label></div>
+
+<div class="packageExtendedDetail">
+    <div><label h-handle="packageStage"></label></div>
+    <div><label>version:</label></div>
+    <div class="packageVersion"><label h-handle="packageVersion"></label></div>
+</div>
+
+<div class="applicationsContainer viewContainer">
+    <div class="applicationsLabel featureLabel"><label>Applications</label></div>
+    <div class="featureList applications" h-handle="applications"></div>
+</div>
+
+<div class="presenterSetsContainer viewContainer" style="display:none;">
+    <div class="presenterSetsLabel featureLabel"><label>Presenter Sets</label></div>
+    <div class="featureList presenterSets" h-handle="presenterSets"></div>
+</div>
+
+<div class="scriptSetsContainer viewContainer" style="display:none;">
+    <div class="scriptSetsLabel featureLabel"><label>Script Sets</label></div>
+    <div class="featureList scriptSets" h-handle="scriptSets"></div>
+</div>
+
+<div h-template="application" class="application">
+    <label h-handle="name"></label>
+    <label h-handle="description"></label>
+</div>
+
+<div h-clone="scriptSet" class="scriptSet">
+    <label h-handle="name"></label>
+</div>
+
+<div h-clone="presenterSet" class="presenterSet">
+    <label h-handle="name"></label>
+</div>
+
+<div h-handle="actions" class="actions">
+    <hx h-presenter="hxCore.Control.Presenter/Button" h-handle="expandButton" style="display:none;" />
+    <hx h-presenter="hxCore.Control.Presenter/Button" h-handle="installButton" style="display:none;" />
+    <hx h-presenter="hxCore.Control.Presenter/Button" h-handle="uninstallButton" style="display:none;" />
+    <!--<hx h-presenter="hxCore.Control.Presenter/Button" h-handle="runButton" style="display:none;" />-->
+    <hx h-presenter="hxCore.Control.Presenter/Button" h-handle="addButton" style="display:none;" />
+    <hx h-presenter="hxCore.Control.Presenter/Button" h-handle="removeButton" style="display:none;" />
+</div>
+
+<div class="packageSourceContainer">
+    <label>Source:</label>
+    <div class="packageSource"><label h-handle="source"></label></div>
+    <hx h-presenter="hxCore.Control.Presenter/Button" h-handle="openFolderButton" style="display:none;" />
+</div>
+
+<script>
+
+    function PackageSummary() {
+        this.package = null;
+        this.contextKey = null;
+    }
+
+    PackageSummary.prototype = {
+
+        start: function () {
+
+            var t = this;
+            //console.log("PackageSummary - ", t);
+
+            t.addButton.proxy.setText("Add");
+            t.addButton.proxy.setWidth(90);
+            t.addButton.proxy.setHeight(24);
+            t.addButton.publisher.Clicked.subscribe(() => {
+                t.hularion.publisher.AddToList.publish();
+            });
+            t.installButton.proxy.setText("Install");
+            t.installButton.proxy.setWidth(90);
+            t.installButton.proxy.setHeight(24);
+            t.installButton.publisher.Clicked.subscribe(() => {
+                t.hularion.publisher.Install.publish();
+            });
+            t.uninstallButton.proxy.setText("Uninstall");
+            t.uninstallButton.proxy.setWidth(90);
+            t.uninstallButton.proxy.setHeight(24);
+            t.uninstallButton.publisher.Clicked.subscribe(() => {
+                t.hularion.publisher.Uninstall.publish();
+            });
+            t.removeButton.proxy.setText("Remove");
+            t.removeButton.proxy.setWidth(90);
+            t.removeButton.proxy.setHeight(24);
+            t.removeButton.publisher.Clicked.subscribe(() => {
+                //console.log("PackageSummary - Remove ", t);
+                t.hularion.publisher.RemoveFromList.publish();
+            });
+            t.expandButton.proxy.setText("Expand");
+            t.expandButton.proxy.setWidth(90);
+            t.expandButton.proxy.setHeight(24);
+            t.expandButton.publisher.Clicked.subscribe(() => {
+                //console.log("PackageSummary - Expand ", t);
+                t.hularion.publisher.ExpandView.publish();
+            });
+            //t.runButton.proxy.setText("Run");
+            //t.runButton.proxy.setWidth(90);
+            //t.runButton.proxy.setHeight(24);
+            //t.runButton.publisher.Clicked.subscribe(() => {
+            //    //console.log("PackageSummary - Run ", t);
+            //    t.hularion.publisher.RunApplication.publish();
+            //});
+
+            t.openFolderButton.proxy.setText("Open Folder");
+            t.openFolderButton.proxy.setWidth(100);
+            t.openFolderButton.proxy.setHeight(24);
+            t.openFolderButton.publisher.Clicked.subscribe(() => {
+                t.hularion.router.request("hularion/host/disk/system/openfolder", { directory: t.package.source.location });
+            });
+
+        },
+
+        setContextKey: function (contextKey) {
+            this.contextKey = contextKey;
+        },
+
+        setPackage: function (package) {
+            var t = this;
+            console.log("PackageSummary.setPackage - ", t, package);
+            t.package = package;
+            t.name.html(t.package.name);
+            t.name.attr("title")
+            t.name.attr("title", "name: " + t.package.name + ", key: " + t.package.packageKey);
+
+            t.packageStage.html(package.stage);
+            t.packageVersion.html(package.version);
+
+            if (package.source != null) {
+                t.source.html(package.source.location);
+                t.source.attr("title", package.source.location);
+                if (package.source.structure == "Disk") {
+                    t.openFolderButton.view.css("display", "");
+                }
+            }
+
+            t.package.applications.forEach(application => {
+                //console.log("PackageSummary.setPackage application- ", application);
+                var applicationView = t.hularion.createTemplate("application");
+                applicationView.handles.name.html(application.name);
+                //applicationView.handles.runButton.view.css("display", "");
+                //t.openFolderButton.proxy.setText("Run");
+                //t.openFolderButton.proxy.setWidth(50);
+                //t.openFolderButton.proxy.setHeight(24);
+
+                //console.log("PackageSummary.setPackage application- ", application, applicationView);
+                t.applications.append(applicationView.view);
+            });
+            //t.package.scriptSets.forEach(scriptSet => {
+            //    var scriptSetView = t.hularion.createClone("scriptSet");
+            //    scriptSetView.handles.name.html(scriptSet.name);
+            //    t.scriptSets.append(scriptSetView.view);
+            //});
+            //t.package.presenterSets.forEach(presenterSet => {
+            //    var presenterSetView = t.hularion.createClone("presenterSet");
+            //    presenterSetView.handles.name.html(presenterSet.name);
+            //    //console.log("PackageSummary.setPackage presenterSet- ", presenterSet, presenterSetView);
+            //    t.presenterSets.append(presenterSetView.view);
+            //});
+
+            t.description.html(t.package.description);
+
+        },
+
+        showComponent: function (component) {
+            component.css("display", "");
+        },
+
+        hideComponent: function (component) {
+            component.css("display", "none");
+        },
+
+        showAllButtons: function () {
+            var t = this;
+            t.showComponent(t.addButton.view);
+            t.showComponent(t.installButton.view);
+            t.showComponent(t.uninstallButton.view);
+            t.showComponent(t.removeButton.view);
+            t.showComponent(t.expandButton.view);
+            //t.showComponent(t.runButton.view);
+        },
+
+        showAddButton: function () {
+            var t = this;
+            t.showComponent(t.addButton.view);
+        },
+
+        showInstallButton: function () {
+            var t = this;
+            t.showComponent(t.installButton.view);
+        },
+
+        showUninstallButton: function () {
+            var t = this;
+            t.showComponent(t.uninstallButton.view);
+        },
+
+        showRemoveButton: function () {
+            var t = this;
+            t.showComponent(t.removeButton.view);
+        },
+
+        showExpandButton: function () {
+            var t = this;
+            t.showComponent(t.expandButton.view);
+        },
+
+        //showRunButton: function () {
+        //    var t = this;
+        //    t.showComponent(t.runButton.view);
+        //},
+
+        hideAllButtons: function () {
+            var t = this;
+            t.hideComponent(t.addButton.view);
+            t.hideComponent(t.installButton.view);
+            t.hideComponent(t.uninstallButton.view);
+            t.hideComponent(t.removeButton.view);
+            t.hideComponent(t.expandButton.view);
+            //t.hideComponent(t.runButton.view);
+        },
+
+        hideAddButton: function () {
+            var t = this;
+            t.hideComponent(t.addButton.view);
+        },
+
+        hideInstallButton: function () {
+            var t = this;
+            t.hideComponent(t.installButton.view);
+        },
+
+        hideUninstallButton: function () {
+            var t = this;
+            t.hideComponent(t.uninstallButton.view);
+        },
+
+        hideRemoveButton: function () {
+            var t = this;
+            t.hideComponent(t.removeButton.view);
+        },
+
+        hideExpandButton: function () {
+            var t = this;
+            t.hideComponent(t.expandButton.view);
+        },
+
+        //hideRunButton: function () {
+        //    var t = this;
+        //    t.hideComponent(t.runButton.view);
+        //}
+    }
+
+</script>
+
+
+<style>
+    .this {
+        user-select: none;
+        padding: 10px;
+        overflow: hidden;
+    }
+
+    div {
+        width: 100%;
+    }
+
+    .packageName {
+        font-size: 20px;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    .featureList {
+        padding-left: 10px;
+        margin-top: 5px;
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    .featureLabel {
+        font-size: 18px;
+        text-decoration: underline;
+    }
+
+    .viewContainer {
+        margin-bottom: 10px;
+        width: 100%;
+    }
+
+    .packageName {
+        font-size: 20px;
+    }
+
+    .actions > * {
+        margin-right: 5px;
+    }
+
+
+    .packageSourceContainer {
+        margin: 10px 0px 10px 0px;
+        display: inline-block;
+        border: solid 1px lightgray;
+        padding: 5px;
+        width: calc(100% - 10px);
+    }
+    .packageSourceContainer > *{
+        float:left;
+        margin-bottom:5px;
+        margin-right:10px;
+    }
+    .packageSource {
+        font-size: 14px;
+    }
+
+
+    .packageExtendedDetail {
+        display: inline-block;
+    }
+        .packageExtendedDetail > * {
+            float: left;
+            width:auto;
+            margin-bottom: 5px;
+            margin-right: 10px;
+        }
+    .packageVersion{
+        font-weight:bold;
+    }
+</style>
+
+<style h-style-category-key="Theme" h-style-category-value="Light">
+</style>
+<style h-style-category-key="Theme" h-style-category-value="Dark">
+</style>
+

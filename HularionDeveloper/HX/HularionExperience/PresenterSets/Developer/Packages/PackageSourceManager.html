@@ -1,0 +1,132 @@
+﻿<!--
+MIT License
+
+Copyright (c) 2023 Johnathan A Drews
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+-->
+
+
+<hx h-publisher="LoadFinished" />
+<hx h-publisher="PackageSourceCreated" />
+<hx h-publisher="PackageSourceDeleted" />
+
+<hx h-proxy="setUserContextKey" h-method="setUserContextKey" />
+<hx h-proxy="load" h-method="load" />
+
+
+<div class="header">
+    <hx h-presenter="hxCore.Control.Presenter/Button" h-handle="addSourceButton" />
+</div>
+<div h-handle="packageSources" class="packageSources"></div>
+
+
+<script>
+
+    function PackageSourceManager() {
+        this.contextKey = null;
+    }
+
+    PackageSourceManager.prototype = {
+
+        start: function (options) {
+
+            var t = this;
+            console.log("PackageSourceManager - ", options, t, hxDeveloper.Presenter);
+
+            t.addSourceButton.proxy.setWidth(100);
+            t.addSourceButton.proxy.setHeight(24);
+            t.addSourceButton.proxy.setText("Add Source");
+            t.addSourceButton.publisher.Clicked.subscribe(() => {
+                t.createSource();
+            });
+        },
+
+        setUserContextKey: function (contextKey) {
+            this.contextKey = contextKey;
+        },
+
+        load: function () {
+            var t = this;
+
+            t.hularion.router.request("hularion/state/context/packagesources/get", { contextKey: this.contextKey }).then(response => {
+
+                console.log("PackageSourceManager - get package sources - ", response);
+
+                for (var i = 0; i < response.detail.packageSources.length; i++) {
+                    var source = response.detail.packageSources[i];
+                    t.createSource(source);
+                }
+                t.hularion.publisher.LoadFinished.publish();
+            });
+        },
+
+        createSource: function (source) {
+            var t = this;
+            var sourcePresenter = hxDeveloper.Presenter.presenters.PackageSource.create();
+            sourcePresenter.proxy.setContextKey(t.contextKey);
+            sourcePresenter.view.addClass("packageSource");
+            sourcePresenter.publisher.Created.subscribe((o, createdSource) => {
+                console.log("PackageSourceManager - createSource - ", createdSource);
+                t.hularion.publisher.PackageSourceCreated.publish(createdSource);
+            });
+            if (source != null) { sourcePresenter.proxy.setSource(source); }
+            sourcePresenter.publisher.Deleted.subscribe(() => {
+                sourcePresenter.view.remove();
+            });
+            t.packageSources.append(sourcePresenter.view);
+        }
+
+    }
+
+</script>
+
+
+<style>
+    .this {
+        padding: 4px;
+    }
+
+    .header{
+        width:100%;
+    }
+
+    .packageSource {
+        width: 100%;
+    }
+
+    .packageSources{
+        display:inline-block;
+    }
+
+    .packageSource {
+        width: 300px;
+        border-style: solid;
+        border-width: 1px;
+        margin:10px 10px 0px 0px;
+        padding:10px;
+        float: left;
+    }
+
+</style>
+
+<style h-style-category-key="Theme" h-style-category-value="Light">
+    .this {
+        background-color: white;
+        color: black;
+        border-color: lightgray;
+    }
+</style>
+<style h-style-category-key="Theme" h-style-category-value="Dark">
+    .this {
+        background-color: black;
+        color: white;
+        border-color: darkgray;
+    }
+</style>
+

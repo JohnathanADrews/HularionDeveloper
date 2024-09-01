@@ -1,0 +1,149 @@
+﻿<!--
+MIT License
+
+Copyright (c) 2023 Johnathan A Drews
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+-->
+
+<div class="packageHeader">
+    <div><label>Name</label></div>
+    <hx h-presenter="hxCore.Control.Presenter/TextBox" h-handle="projectName" />
+    <div><label>Key</label></div>
+    <hx h-presenter="hxCore.Control.Presenter/TextBox" h-handle="projectKey" />
+    <div><label>Version</label></div>
+    <hx h-presenter="hxCore.Control.Presenter/TextBox" h-handle="projectVersion" />
+    <div><label>Description</label></div>
+    <hx h-presenter="hxCore.Control.Presenter/TextBox" h-handle="projectDescription" />
+    <div><label>Product Key</label></div>
+    <hx h-presenter="hxCore.Control.Presenter/TextBox" h-handle="productKey" />
+</div>
+
+<div class="itemGroup applications">
+    <div class="groupList"  h-handle="applicationList">
+
+    </div>
+    <hx h-presenter="hxCore.Control.Presenter/Button" h-handle="addApplicationButton" />
+</div>
+
+<div class="itemGroup presenterSets">
+    <div class="groupList" h-handle="presenterSetList">
+
+    </div>
+    <hx h-presenter="hxCore.Control.Presenter/Button" h-handle="addPresenterSetButton" />
+</div>
+
+<div class="itemGroup scriptSets">
+    <div class="groupList"  h-handle="scriptSetList">
+
+    </div>
+    <hx h-presenter="hxCore.Control.Presenter/Button" h-handle="addScriptSetButton" />
+
+</div>
+
+
+<script>
+
+    function ProjectCreator() {
+    }
+
+    ProjectCreator.prototype = {
+
+        start: function (options) {
+
+            var t = this;
+            console.log("ProjectCreator - ", options, t);
+
+            t.projectName.proxy.setDefaultText("Project Name");
+            t.projectKey.proxy.setDefaultText("Project Key");
+            t.projectVersion.proxy.setDefaultText("Project Version");
+            t.projectDescription.proxy.setDefaultText("Project Description");
+            t.productKey.proxy.setDefaultText("Product Key");
+
+            t.addApplicationButton.proxy.setText("Add Application");
+            t.addApplicationButton.proxy.setWidth(150);
+            t.addApplicationButton.proxy.setHeight(24);
+
+            t.addPresenterSetButton.proxy.setText("Add Presenter Set");
+            t.addPresenterSetButton.proxy.setWidth(150);
+            t.addPresenterSetButton.proxy.setHeight(24);
+            t.addPresenterSetButton.publisher.Clicked.subscribe((o, e) => {
+                var presenter = hxDeveloper.Presenter.presenters.PresenterSetInfo.create();
+                //console.log("ProjectCreator presenter- ", presenter);
+                t.presenterSetList.append(presenter.view);
+            });
+
+            t.addScriptSetButton.proxy.setText("Add Script Set");
+            t.addScriptSetButton.proxy.setWidth(150);
+            t.addScriptSetButton.proxy.setHeight(24);
+
+        }
+    }
+
+</script>
+
+
+<style>
+    .this {
+        user-select: none;
+    }
+
+        .this * {
+            user-select: none;
+        }
+
+    .packageHeader > *{
+        width:100%;
+        margin-bottom:5px;
+    }
+
+    .itemGroup {
+        border: solid 1px;
+        border-radius: 5px;
+        padding: 5px;
+        margin-bottom: 10px;
+    }
+
+    .groupList {
+    }
+
+    .groupList > * {
+        border: solid 1px;
+        border-radius: 5px;
+        padding: 5px;
+        margin-bottom: 10px;
+    }
+</style>
+
+<style h-style-category-key="Theme" h-style-category-value="Light">
+    .this {
+        background-color: white;
+        color: black;
+        border-color: lightgray;
+    }
+    .itemGroup{
+        border-color: black;
+    }
+    .groupList {
+        border-color: black;
+    }
+</style>
+<style h-style-category-key="Theme" h-style-category-value="Dark">
+    .this {
+        background-color: black;
+        color: white;
+        border-color: darkgray;
+    }
+    .itemGroup {
+        border-color: white;
+    }
+    .groupList {
+        border-color: white;
+    }
+</style>
+

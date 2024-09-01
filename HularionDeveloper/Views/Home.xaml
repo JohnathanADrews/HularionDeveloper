@@ -1,0 +1,46 @@
+﻿<UserControl x:Class="HularionDeveloper.Views.Home"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:HularionDeveloper.Views"
+             xmlns:viewmodels="clr-namespace:HularionDeveloper.ViewModels"
+             xmlns:views="clr-namespace:HularionDeveloper.Views"
+             xmlns:hxviewmodels="clr-namespace:HularionExperience.Embedded.ViewModels;assembly=HularionExperience.Embedded"
+             xmlns:hxviews="clr-namespace:HularionExperience.Embedded.Views;assembly=HularionExperience.Embedded"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid Background="Black">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="22"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+
+        <ContentControl Grid.Row="1" Content="{Binding Display}" Margin="0 0 0 0" >
+            <ContentControl.Resources>
+                <DataTemplate DataType="{x:Type hxviewmodels:BrowserViewModel}">
+                    <hxviews:Browser />
+                </DataTemplate>
+            </ContentControl.Resources>
+        </ContentControl>
+        
+        <Menu Grid.Row="0" VerticalAlignment="Center" Background="WhiteSmoke" Visibility="Visible">
+            <MenuItem Header="View" >
+                <MenuItem Header="Select Style" ItemsSource="{Binding StyleMenuItems}">
+                    <MenuItem.ItemContainerStyle>
+                        <Style TargetType="MenuItem" >
+                            <Setter Property="Header" Value="{Binding Path=Name}"></Setter>
+                            <Setter Property="ItemsSource" Value="{Binding Path=Items}"></Setter>
+                            <Setter Property="Command" Value="{Binding Path=Command}"></Setter>
+                        </Style>
+                    </MenuItem.ItemContainerStyle>
+                </MenuItem>
+            </MenuItem>
+            <MenuItem Header="Tools" IsEnabled="{Binding ToolsIsEnabled}">
+                <MenuItem Header="Refresh" Command="{Binding Refresh}" IsEnabled="{Binding RefreshIsEnabled}"/>
+                <MenuItem Header="Show Dev Tools" Command="{Binding ShowDevTools}" IsEnabled="{Binding ShowDevToolsIsEnabled}"/>
+            </MenuItem>
+        </Menu>
+    </Grid>
+</UserControl>

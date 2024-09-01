@@ -1,0 +1,229 @@
+﻿<!--
+MIT License
+
+Copyright (c) 2023 Johnathan A Drews
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+-->
+
+<hx h-proxy="setPackage" />
+<hx h-proxy="setCanRunApplication" />
+<hx h-publisher="Closed" />
+<hx h-publisher="RunApplication" />
+
+<div class="menu">
+    <div class="packageTitle"><label h-handle="packageTitle"></label></div>
+    <div class="packageMenu">
+        <hx h-presenter="hxCore.Control.Presenter/Button" h-handle="closeButton" />
+    </div>
+</div>
+<div class="body">
+    <div class="descriptionContainer lineContainer"><label h-handle="projectDescription"></label></div>
+    <div class="sourceContainer lineContainer">
+        <div class="projectSourceType"><label class="projectSourceLabel">Stage: </label><label h-handle="projectSourceType"></label></div>
+        <div class="projectSourceStructure"><label class="projectSourceLabel">Storage: </label><label h-handle="projectSourceStructure"></label></div>
+        <div class="projectSourceLocation"><label class="projectSourceLabel">Source: </label><label h-handle="projectSourceLocation"></label></div>
+    </div>
+    <div class="applicationsContainer lineContainer">
+        <div class="applicationsHeader lineHeader"><label>Applications</label></div>
+        <div h-handle="applicationsContainer" class="innerListContainer"></div>
+    </div>
+    <div class="presenterSetsContainer lineContainer">
+        <div class="presenterSetsHeader lineHeader"><label>Presenter Sets</label></div>
+        <div h-handle="presenterSetsContainer" class="innerListContainer"></div>
+    </div>
+    <div class="scriptSetsContainer lineContainer" h-handle="scriptSetsContainer">
+        <div class="scriptSetsHeader lineHeader"><label>Script Sets</label></div>
+        <div h-handle="scriptSetsContainer" class="innerListContainer"></div>
+    </div>
+    <div class="packageReferencesContainer lineContainer" h-handle="packageReferencesContainer">
+        <div class="packageReferencesHeader lineHeader"><label>References</label></div>
+        <div h-handle="packageReferencesContainer" class="innerListContainer"></div>
+    </div>
+</div>
+
+<div h-template="application" class="packageApplication">
+    <div class="titleLine">
+        <hx h-presenter="hxCore.Control.Presenter/Button" h-handle="runButton" />
+        <div class="title"><label h-handle="title" ></label></div>
+    </div>
+    <div><label h-handle="description"></label></div>
+</div>
+<div h-clone="presenterSet">
+    <div><label h-handle="title"></label></div>
+    <div><label h-handle="description"></label></div>
+</div>
+<div h-clone="scriptSet">
+    <div><label h-handle="title"></label></div>
+    <div><label h-handle="description"></label></div>
+</div>
+<div h-clone="packageReference">
+    <div><label h-handle="title"></label></div>
+    <div><label h-handle="description"></label></div>
+</div>
+
+
+<script>
+
+    function ExpandedPackageView() {
+        this.packages = null;
+        this.contextKey = null;
+        this.canRunApplication = false;
+    }
+
+    ExpandedPackageView.prototype = {
+
+        start: function () {
+
+            var t = this;
+            //console.log("ExpandedPackageView - ", t);
+
+            t.closeButton.proxy.setText("X");
+            t.closeButton.proxy.setWidth(24);
+            t.closeButton.proxy.setHeight(24);
+
+            t.closeButton.publisher.Clicked.subscribe(() => {
+                t.hularion.publisher.Closed.publish();
+            });
+
+        },
+
+        setContextKey: function (contextKey) {
+            this.contextKey = contextKey;
+        },
+
+        setCanRunApplication: function (canRunApplication) {
+            this.canRunApplication = canRunApplication;
+        },
+
+        setPackage: function (package) {
+            var t = this;
+            //console.log("ExpandedPackageView.setPackage - ", t, package);
+
+            t.packageTitle.html(package.name);
+            t.projectDescription.html(package.description);
+
+            package.applications.forEach(application => {
+                var clone = t.hularion.createTemplate("application");
+                console.log("ExpandedPackageView.setPackage application - ", package, application, clone);
+                clone.handles.title.html(application.name);
+                clone.handles.description.html(application.description);
+                clone.handles.runButton.proxy.setText("Run");
+                clone.handles.runButton.proxy.setWidth(50);
+                clone.handles.runButton.proxy.setHeight(24);
+                clone.handles.runButton.publisher.Clicked.subscribe(() => {
+                    t.hularion.publisher.RunApplication.publish({ package: package, application: application });
+                });
+                if (!t.canRunApplication) {
+                    clone.handles.runButton.view.css("visibility", "hidden");
+                }
+                t.applicationsContainer.append(clone.view);
+            });
+            package.presenterSets.forEach(presenterSet => {
+                var clone = t.hularion.createClone("presenterSet");
+                //console.log("ExpandedPackageView.setPackage presenterSet - ", presenterSet, clone);
+                clone.handles.title.html(presenterSet.name);
+                clone.handles.description.html(presenterSet.description);
+                t.presenterSetsContainer.append(clone.view);
+            });
+            package.scriptSets.forEach(scriptSet => {
+                var clone = t.hularion.createClone("scriptSet");
+                //console.log("ExpandedPackageView.setPackage presenterSet - ", scriptSet, clone);
+                clone.handles.title.html(scriptSet.name);
+                clone.handles.description.html(scriptSet.description);
+                t.scriptSetsContainer.append(clone.view);
+            });
+
+            t.projectSourceType.html(package.source.type);
+            t.projectSourceStructure.html(package.source.structure);
+            t.projectSourceLocation.html(package.source.location);
+        }
+    }
+
+</script>
+
+<style>
+
+
+    .menu {
+        width: 100%;
+        height: 20px;
+        display: inline-block;
+    }
+
+    .packageTitle {
+        float: left;
+    }
+
+    .packageMenu {
+        float: right;
+    }
+
+    .packageTitle {
+        font-weight: bold;
+        font-size: 26px;
+    }
+
+    .body {
+        width: 100%;
+        height: calc(100% - 20px);
+    }
+
+    .projectSourceLabel {
+        font-weight: bold;
+        font-size: 16px;
+    }
+
+    .sourceContainer {
+        display: inline-block;
+    }
+
+        .sourceContainer > * {
+            float: left;
+            margin-right: 20px;
+        }
+
+    .projectSourceLocation {
+        width: 100%;
+    }
+
+    .lineContainer {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .lineHeader {
+        font-weight: bold;
+        font-size: 24px;
+        margin-bottom: 10px;
+    }
+
+
+    .lineContainer > .innerListContainer {
+        margin-left: 20px;
+    }
+
+    .packageApplication > .titleLine {
+        display: inline-block;
+    }
+    .packageApplication > .titleLine > *{
+        float:left;
+        margin-right:10px;
+    }
+    .packageApplication > .titleLine .title {
+        font-size:16px;
+        margin-top:2px;
+    }
+
+</style>
+
+<style h-style-category-key="Theme" h-style-category-value="Light">
+</style>
+<style h-style-category-key="Theme" h-style-category-value="Dark">
+</style>
+

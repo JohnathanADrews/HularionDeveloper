@@ -1,0 +1,150 @@
+﻿<!--
+MIT License
+
+Copyright (c) 2023 Johnathan A Drews
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+-->
+
+<hx h-publisher="AgreementAccepted" />
+
+<h1 class="header">Hularion Player</h1>
+<h2>About</h2>
+
+<p>Hularion Player is platform for playing applications created using the Hularion Experience framework. 
+    Hularion Experience compiles source projects into application packages and then assembles those applications in a web browser. 
+    These packages may also reference software outside of the browser that can access the network, file system, and other aspects of the operating system or other software or systems.
+</p>
+
+<p>By using this software, you agree to the following license agreement:</p>
+
+<textarea style="width:calc(100% - 40px);height:300px;margin-left:15px;" disabled>
+MIT License
+
+Copyright (c) 2023 Johnathan A Drews
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+</textarea>
+<br />
+<input type="checkbox" h-handle="agreeLicenseBox" style="margin-top:0px;margin-left:100px;" />
+<label style="margin-left:10px;">I Agree</label>
+<br />
+
+
+<p>By using this software, you agree to the following:</p>
+
+<textarea style="width:calc(100% - 40px);height:60px;margin-left:15px;" disabled>
+The developers, owners, and maintainers of this software do not license any third-party packages or other software, and they are not responsible for it. Any license agreement is between you and the the owner of that package or software. 
+</textarea>
+<input type="checkbox" h-handle="agreeThirdPartyBox" style="margin-top:0px;margin-left:100px;" />
+<label style="margin-left:10px;">I Agree</label>
+<br />
+
+<br />
+
+<label style="margin-top: 10px; margin-left: 100px; margin-top: 20px;">Context Name:</label>
+<input type="text" h-handle="contextNameInput" style="width:200px;margin-left:10px;" />
+<div h-handle="inputError" class="inputError" style="width:100%;visibility:hidden;height:24px;"><label style="margin-left:180px;">Context name requires at least three characters without leading or trailing spaces.</label></div>
+
+<input h-handle="submit" type="button" value="Agree and Continue" enabled="false" style="visibility: hidden; margin-top: 0px; margin-left: 100px; margin-bottom: 100px; " />
+
+
+<script>
+
+    function NewInstance() {
+        this.contextname = "";
+    }
+
+    NewInstance.prototype = {
+
+        start: function (options) {
+
+            var t = this;
+            console.log("NewInstance - ", options, t);
+
+            var submitUpdater = () => {
+                if (t.agreeLicenseBox[0].checked === true && t.agreeThirdPartyBox[0].checked === true) {
+                    t.submit.css("visibility", "visible");
+                }
+                else {
+                    t.submit.css("visibility", "hidden");
+                }
+            };
+
+            t.agreeLicenseBox.on("click", () => {
+                submitUpdater();
+            });
+
+            t.agreeThirdPartyBox.on("click", () => {
+                submitUpdater();
+            });
+
+            t.submit.on("click", () => {
+                t.contextname = t.contextNameInput[0].value.trim();
+                if (t.contextname.length < 3) {
+                    t.inputError.css("visibility", "visible");
+                    return;
+                }
+                t.inputError.css("visibility", "hidden");
+
+                t.hularion.router.request("hularion/state/context/create", { contextName: t.contextname }).then(response => {
+                    console.log("NewInstance.start hularion/state/context/create - ", response);
+                    t.hularion.publisher.AgreementAccepted.publish();
+                });
+            });
+
+        }
+    }
+
+</script>
+
+
+<style>
+    .this {
+        padding: 10px;
+
+        overflow-y:scroll;
+        height:95vh;
+    }
+
+    .this * {
+        user-select: none;
+    }
+
+    .header {
+        text-align: center;
+    }
+</style>
+
+<style h-style-category-key="Theme" h-style-category-value="Light">
+    .this {
+        background-color: white;
+        color: black;
+        border-color: lightgray;
+        background-color: rgb(200,200,200);
+        /*background: linear-gradient(135deg, rgb(200,200,200) 0%, white 80%, rgb(200,200,200) 100%);*/
+    }
+</style>
+<style h-style-category-key="Theme" h-style-category-value="Dark">
+    .this {
+        background-color: black;
+        color: white;
+        border-color: darkgray;
+        background-color: rgb(50,50,50);
+        /*background: linear-gradient(15deg, rgb(20,20,20) 0%, rgb(50,50,50) 40%, rgb(100,100,100) 60%, black 80%, black 100%);*/
+    }
+
+    .inputError {
+        color: rgb(248, 165, 103);
+    }
+</style>
+

@@ -1,0 +1,124 @@
+﻿<!--
+MIT License
+
+Copyright (c) 2023 Johnathan A Drews
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+-->
+
+
+<hx h-publisher="OnPackageNew" h-encoding="json" />
+<hx h-publisher="OnPackageOpen" h-encoding="json" />
+<hx h-publisher="OnPackageClose" h-encoding="json" />
+<hx h-publisher="OnPackageSave" h-encoding="json" />
+
+<div class="windowControl" h-handle="windowControl">
+    <hx h-handle="menu" h-presenter="hxCore.Control.Presenter/Menu">
+        <hx h-handle="menuItems.Package" h-component="hxCore.Control.Presenter/MenuItem=>AddMenuItemHandler" h-start-parameter='{"name": "Package"}'>
+            <hx h-handle="menuItems.Open" h-component="hxCore.Control.Presenter/MenuItem=>AddMenuItemHandler" h-start-parameter='{"name": "List"}' h-subscribe="Clicked=>onClickPackageOpen" />
+            <hx h-handle="menuItems.New" h-component="hxCore.Control.Presenter/MenuItem=>AddMenuItemHandler" h-start-parameter='{"name": "Search"}' h-subscribe="Clicked=>onClickPackageNew" />
+            <hx h-handle="menuItems.New" h-component="hxCore.Control.Presenter/MenuItem=>AddMenuItemHandler" h-start-parameter='{"name": "View Sources"}' h-subscribe="Clicked=>onClickPackageNew" />
+        </hx>
+        <hx h-handle="menuItems.View" h-component="hxCore.Control.Presenter/MenuItem=>AddMenuItemHandler" h-start-parameter='{"name": "View"}'>
+            <hx h-component="hxCore.Control.Presenter/MenuItem=>AddMenuItemHandler" h-start-parameter='{"name": "Select Style"}' h-subscribe="Clicked=>onClickPackageClose"></hx>
+        </hx>
+        <hx h-handle="menuItems.Tools" h-component="hxCore.Control.Presenter/MenuItem=>AddMenuItemHandler" h-start-parameter='{"name": "Tools"}'>
+            <hx h-component="hxCore.Control.Presenter/MenuItem=>AddMenuItemHandler" h-start-parameter='{"name": "Browser"}'>
+                <hx h-component="hxCore.Control.Presenter/MenuItem=>AddMenuItemHandler" h-start-parameter='{"name": "Refresh"}' h-subscribe="Clicked=>onClickPackageClose"></hx>
+                <hx h-component="hxCore.Control.Presenter/MenuItem=>AddMenuItemHandler" h-start-parameter='{"name": "Open Developer Tools"}' h-subscribe="Clicked=>onClickPackageClose"></hx>
+                <hx h-component="hxCore.Control.Presenter/MenuItem=>AddMenuItemHandler" h-start-parameter='{"name": "Close Developer Tools"}' h-subscribe="Clicked=>onClickPackageClose"></hx>
+                <hx h-component="hxCore.Control.Presenter/MenuItem=>AddMenuItemHandler" h-start-parameter='{"name": "Set Open By Default"}' h-subscribe="Clicked=>onClickPackageClose"></hx>
+                <hx h-component="hxCore.Control.Presenter/MenuItem=>AddMenuItemHandler" h-start-parameter='{"name": "Set Closed By Default"}' h-subscribe="Clicked=>onClickPackageClose"></hx>
+            </hx>
+        </hx>
+    </hx>
+</div>
+
+
+<script>
+
+    function MenuContainer() {
+    }
+
+    MenuContainer.prototype = {
+
+        start: function () {
+
+            var t = this;
+            console.log("MenuContainer start - ", t);
+        },
+
+        onClickPackageOpen: function () {
+            this.hularion.publisher.OnPackageOpen.publish();
+        },
+
+        onClickPackageNew: function () {
+            this.hularion.publisher.OnPackageNew.publish();
+        },
+
+        onClickPackageSave: function () {
+            this.hularion.publisher.OnPackageSave.publish();
+        },
+
+        onClickPackageClose: function () {
+            this.hularion.publisher.OnPackageClose.publish();
+        }
+    }
+
+</script>
+
+
+<style>
+    .this {
+        user-select: none;
+        display: inline-block;
+        border-style: solid;
+        border-width: 1px;
+        width: 100%;
+        height: 34px;
+    }
+
+        .this * {
+            cursor: pointer;
+            user-select: none;
+        }
+
+    .iconContainer {
+        cursor: pointer;
+        background-color: white;
+        color: blue;
+        display: inline-block;
+        width: 24px;
+        height: 24px;
+        padding: 2px;
+        border-radius: 4px;
+    }
+
+        .iconContainer > * {
+            width: 100%;
+            height: auto;
+        }
+</style>
+
+
+
+<style h-style-category-key="Theme" h-style-category-value="Light">
+    .this {
+        background-color: white;
+        color: black;
+        border-color: lightgray;
+    }
+</style>
+<style h-style-category-key="Theme" h-style-category-value="Dark">
+    .this {
+        background-color: black;
+        color: white;
+        border-color: darkgray;
+    }
+</style>
+

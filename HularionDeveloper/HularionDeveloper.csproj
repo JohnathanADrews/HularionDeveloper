@@ -1,0 +1,99 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net7.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+    <ApplicationIcon>HularionIcon.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="HX\HularionExperience\Applications\HularionDeveloper.html" />
+    <None Remove="HX\HularionExperience\Configuration\DeveloperConfig.html" />
+    <None Remove="HX\HularionExperience\HularionExperienceDeveloper.hxproject" />
+    <None Remove="HX\HularionExperience\PresenterSets\Developer\About.html" />
+    <None Remove="HX\HularionExperience\PresenterSets\Developer\Applications\ApplicationSummary.html" />
+    <None Remove="HX\HularionExperience\PresenterSets\Developer\Applications\ApplicationsView.html" />
+    <None Remove="HX\HularionExperience\PresenterSets\Developer\ContextProfile.html" />
+    <None Remove="HX\HularionExperience\PresenterSets\Developer\ContextSelector.html" />
+    <None Remove="HX\HularionExperience\PresenterSets\Developer\HularionDeveloper.html" />
+    <None Remove="HX\HularionExperience\PresenterSets\Developer\HularionPlayer.html" />
+    <None Remove="HX\HularionExperience\PresenterSets\Developer\HularionViewer.html" />
+    <None Remove="HX\HularionExperience\PresenterSets\Developer\LicenseViewer.html" />
+    <None Remove="HX\HularionExperience\PresenterSets\Developer\LoadingScreen.html" />
+    <None Remove="HX\HularionExperience\PresenterSets\Developer\NewInstance.html" />
+    <None Remove="HX\HularionExperience\PresenterSets\Developer\Packages\ExpandedPackageView.html" />
+    <None Remove="HX\HularionExperience\PresenterSets\Developer\Packages\MyPackagesViewer.html" />
+    <None Remove="HX\HularionExperience\PresenterSets\Developer\Packages\PackageBuilder.html" />
+    <None Remove="HX\HularionExperience\PresenterSets\Developer\Packages\PackageInstaller.html" />
+    <None Remove="HX\HularionExperience\PresenterSets\Developer\Packages\PackageInstallerDependency.html" />
+    <None Remove="HX\HularionExperience\PresenterSets\Developer\Packages\PackageSource.html" />
+    <None Remove="HX\HularionExperience\PresenterSets\Developer\Packages\PackageSourceManager.html" />
+    <None Remove="HX\HularionExperience\PresenterSets\Developer\Packages\PackageSummary.html" />
+    <None Remove="HX\HularionExperience\PresenterSets\Developer\Packages\PackagesViewer.html" />
+    <None Remove="HX\HularionExperience\PresenterSets\Developer\Projects\ApplicationInfo.html" />
+    <None Remove="HX\HularionExperience\PresenterSets\Developer\Projects\PresenterSetInfo.html" />
+    <None Remove="HX\HularionExperience\PresenterSets\Developer\Projects\ProjectCreator.html" />
+    <None Remove="HX\HularionExperience\PresenterSets\Developer\Projects\ScriptSetInfo.html" />
+    <None Remove="HX\HularionExperience\PresenterSets\Developer\Test.html" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="HularionIcon.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="HX\HularionExperience\Applications\HularionDeveloper.html" />
+    <EmbeddedResource Include="HX\HularionExperience\Configuration\DeveloperConfig.html" />
+    <EmbeddedResource Include="HX\HularionExperience\HularionExperienceDeveloper.hxproject" />
+    <EmbeddedResource Include="HX\HularionExperience\PresenterSets\Developer\About.html" />
+    <EmbeddedResource Include="HX\HularionExperience\PresenterSets\Developer\Applications\ApplicationSummary.html" />
+    <EmbeddedResource Include="HX\HularionExperience\PresenterSets\Developer\Applications\ApplicationsView.html" />
+    <EmbeddedResource Include="HX\HularionExperience\PresenterSets\Developer\HularionDeveloper.html" />
+    <EmbeddedResource Include="HX\HularionExperience\PresenterSets\Developer\Projects\ScriptSetInfo.html" />
+    <EmbeddedResource Include="HX\HularionExperience\PresenterSets\Developer\Projects\PresenterSetInfo.html" />
+    <EmbeddedResource Include="HX\HularionExperience\PresenterSets\Developer\Projects\ApplicationInfo.html" />
+    <EmbeddedResource Include="HX\HularionExperience\PresenterSets\Developer\Projects\ProjectCreator.html" />
+    <EmbeddedResource Include="HX\HularionExperience\PresenterSets\Developer\Test.html" />
+    <EmbeddedResource Include="HX\HularionExperience\PresenterSets\Developer\ContextProfile.html" />
+    <EmbeddedResource Include="HX\HularionExperience\PresenterSets\Developer\ContextSelector.html" />
+    <EmbeddedResource Include="HX\HularionExperience\PresenterSets\Developer\HularionPlayer.html" />
+    <EmbeddedResource Include="HX\HularionExperience\PresenterSets\Developer\HularionViewer.html" />
+    <EmbeddedResource Include="HX\HularionExperience\PresenterSets\Developer\LicenseViewer.html" />
+    <EmbeddedResource Include="HX\HularionExperience\PresenterSets\Developer\LoadingScreen.html" />
+    <EmbeddedResource Include="HX\HularionExperience\PresenterSets\Developer\NewInstance.html" />
+    <EmbeddedResource Include="HX\HularionExperience\PresenterSets\Developer\Packages\ExpandedPackageView.html" />
+    <EmbeddedResource Include="HX\HularionExperience\PresenterSets\Developer\Packages\MyPackagesViewer.html" />
+    <EmbeddedResource Include="HX\HularionExperience\PresenterSets\Developer\Packages\PackageBuilder.html" />
+    <EmbeddedResource Include="HX\HularionExperience\PresenterSets\Developer\Packages\PackageInstaller.html" />
+    <EmbeddedResource Include="HX\HularionExperience\PresenterSets\Developer\Packages\PackageInstallerDependency.html" />
+    <EmbeddedResource Include="HX\HularionExperience\PresenterSets\Developer\Packages\PackageSource.html" />
+    <EmbeddedResource Include="HX\HularionExperience\PresenterSets\Developer\Packages\PackageSourceManager.html" />
+    <EmbeddedResource Include="HX\HularionExperience\PresenterSets\Developer\Packages\PackageSummary.html" />
+    <EmbeddedResource Include="HX\HularionExperience\PresenterSets\Developer\Packages\PackagesViewer.html" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CefSharp.Wpf.NETCore" Version="114.2.120" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HularionCore\HularionCore.csproj" />
+    <ProjectReference Include="..\HularionExperience.Embedded\HularionExperience.Embedded.csproj" />
+    <ProjectReference Include="..\HularionMesh.Connector.Sqlite\HularionMesh.Connector.Sqlite.csproj" />
+    <ProjectReference Include="..\HularionMesh.Serializer.Json\HularionMesh.Serializer.Json.csproj" />
+    <ProjectReference Include="..\HularionPlugin.PluginMeta\HularionPlugin.PluginMeta.csproj" />
+    <ProjectReference Include="..\HularionPlugin\HularionPlugin.csproj" />
+    <ProjectReference Include="..\HXCore\HXCore.csproj" />
+    <ProjectReference Include="..\HXFileDialog\HXFileDialog.csproj" />
+    <ProjectReference Include="..\HXUserState\HXUserState.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="HX\HularionExperience\ScriptSets\" />
+    <Folder Include="Plugin\Project\Response\" />
+    <Folder Include="Plugin\Project\Request\" />
+  </ItemGroup>
+
+</Project>

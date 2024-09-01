@@ -1,0 +1,79 @@
+﻿<!--
+MIT License
+
+Copyright (c) 2023 Johnathan A Drews
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+-->
+
+
+<h1 class="header">Hularion Experience (HX)</h1>
+<h2>About</h2>
+
+<p>Hularion Experience is a web and web-to-desktop UI development framework. It relies on its own web assembler to build single-page applications from HX packages.</p>
+
+<h3>Update 2023.5.10 - Style Categories reworked</h3>
+<p>
+    Style Categories enable many different forms of styles to be added and dynamically selected.
+    Currently, this can be tested using the View->Select Style menu items form the main menu.
+    To preview this, edit the About.html file and add or modify style tags using the "h-style-category-key" and "h-style-category-value" attributes.
+    Then, select Tools->Refresh from the main menu. The styles will be added to the menu, and selecting them will update the UI.
+</p>
+
+<script>
+
+function About() {
+}
+
+About.prototype = {
+
+        start: function (options) {
+
+            var t = this;
+            console.log("About - ", options, t);
+        }
+}
+
+</script>
+
+
+<style>
+    .this {
+        user-select: none;
+        display: inline-block;
+        width: calc(100% - 50px);
+        padding: 20px;
+        border-width: 5px;
+        border-style: solid;
+        font-family: Arial;
+    }
+
+        .this * {
+            user-select: none;
+        }
+
+    .header {
+        text-align: center;
+    }
+</style>
+
+<style h-style-category-key="Theme" h-style-category-value="Light">
+    .this {
+        background-color: white;
+        color: black;
+        border-color: lightgray;
+    }
+</style>
+<style h-style-category-key="Theme" h-style-category-value="Dark">
+    .this {
+        background-color: black;
+        color: white;
+        border-color: darkgray;
+    }
+</style>
+

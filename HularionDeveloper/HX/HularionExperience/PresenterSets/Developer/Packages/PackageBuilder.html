@@ -1,0 +1,156 @@
+﻿<!--
+MIT License
+
+Copyright (c) 2023 Johnathan A Drews
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+-->
+
+<h1>PackageBuilder</h1>
+
+<div class="menuPart">
+    <label>Source Directory</label>
+    <hx h-presenter="hxCore.Control.Presenter/Button" h-handle="sourceDirectoryDialogButton" />
+    <hx h-presenter="hxCore.Control.Presenter/TextBox" h-handle="sourceDirectoryTextBox" />
+    <hx h-presenter="fHXFileDialog/SelectDirectoryDialog" h-handle="sourceDirectoryDialog" />
+</div>
+
+<div class="menuPart">
+    <label>Detination Directory</label>
+    <hx h-presenter="hxCore.Control.Presenter/Button" h-handle="destinationDirectoryDialogButton" />
+    <hx h-presenter="hxCore.Control.Presenter/TextBox" h-handle="destinationDirectoryTextBox" />
+    <hx h-presenter="fHXFileDialog/SelectDirectoryDialog" h-handle="destinationDirectoryDialog" />
+</div>
+
+<div class="menuPart">
+    <label>Overwrite Existing package?</label>
+    <input type="checkbox" h-handle="overwiteCheckbox" />
+</div>
+
+<div class="menuPart errorMessage">
+    <label h-handle="errorMessage"></label>
+</div>
+
+
+<div class="menuPart statusMessage">
+    <label h-handle="statusMessage"></label>
+</div>
+
+<div class="menuPart">
+    <hx h-presenter="hxCore.Control.Presenter/Button" h-handle="buildPackageButton" />
+</div>
+
+
+
+<script>
+
+    function PackageBuilder() {
+    }
+
+    PackageBuilder.prototype = {
+
+        start: function (options) {
+
+            var t = this;
+            console.log("PackageBuilder - ", options, t);
+
+            t.sourceDirectoryDialog.proxy.hide();
+            t.sourceDirectoryDialog.proxy.setTitle("Select Project Directory");
+            t.sourceDirectoryDialog.proxy.centerOnWindow();
+            t.sourceDirectoryDialog.publisher.Selected.subscribe((o, e) => {
+                t.sourceDirectoryTextBox.proxy.setText(e.directory);
+            });
+            t.sourceDirectoryTextBox.proxy.setDefaultText("Enter the project source directory.");
+
+            t.destinationDirectoryDialog.proxy.hide();
+            t.destinationDirectoryDialog.proxy.setTitle("Select Package Output directory");
+            t.destinationDirectoryDialog.proxy.centerOnWindow();
+            t.destinationDirectoryDialog.publisher.Selected.subscribe((o, e) => {
+                t.destinationDirectoryTextBox.proxy.setText(e.directory);
+            });
+            t.destinationDirectoryTextBox.proxy.setDefaultText("Enter the package output directory.");
+
+            t.sourceDirectoryDialogButton.proxy.setText("Select Directory");
+            t.sourceDirectoryDialogButton.proxy.setWidth(120);
+            t.sourceDirectoryDialogButton.proxy.setHeight(30);
+            t.sourceDirectoryDialogButton.publisher.Clicked.subscribe(() => {
+                t.sourceDirectoryDialog.proxy.show();
+            });
+
+            t.destinationDirectoryDialogButton.proxy.setText("Select Directory");
+            t.destinationDirectoryDialogButton.proxy.setWidth(120);
+            t.destinationDirectoryDialogButton.proxy.setHeight(30);
+            t.destinationDirectoryDialogButton.publisher.Clicked.subscribe(() => {
+                t.destinationDirectoryDialog.proxy.show();
+            });
+
+
+            t.buildPackageButton.proxy.setText("Build Package");
+            t.buildPackageButton.proxy.setWidth(120);
+            t.buildPackageButton.proxy.setHeight(30);
+            t.buildPackageButton.publisher.Clicked.subscribe(() => {
+                
+                var request = {
+                    overwrite: t.overwiteCheckbox.prop("checked"),
+                    projectLocation: t.sourceDirectoryTextBox.proxy.getText(),
+                    outputLocation: t.destinationDirectoryTextBox.proxy.getText()
+                };
+                if (request.projectLocation != null) {
+                    request.projectLocation = request.projectLocation.trim();
+                    if (request.projectLocation == "") {
+                        request.projectLocation = null;
+                    }
+                }
+                if (request.projectLocation == null) {
+                    t.errorMessage.html("The source directory is not valid.");
+                    return;
+                }
+                if (request.outputLocation != null) {
+                    request.outputLocation = request.outputLocation.trim();
+                    if (request.outputLocation == "") {
+                        request.outputLocation = null;
+                    }
+                }
+                if (request.outputLocation == null) {
+                    t.errorMessage.html("The destination directory is not valid.");
+                    return;
+                }
+
+                t.hularion.router.request("hularion/package/build", request).then(response => {
+                    console.log("PackageBuilder.start t.buildPackageButton.publisher.Clicked (request, response) - ", request, response);
+                });
+
+            });
+            
+        }
+    }
+
+</script>
+
+
+<style>
+    .this {
+    }
+
+    .menuPart {
+        display: inline-block;
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+        .menuPart > * {
+            float: left;
+            margin-right: 10px;
+        }
+
+    .errorMessage{
+        color:red;
+        background-color:white;
+    }
+</style>
+

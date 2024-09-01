@@ -1,0 +1,161 @@
+﻿<!--
+MIT License
+
+Copyright (c) 2023 Johnathan A Drews
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+-->
+
+<hx h-publisher="Created" />
+<hx h-publisher="Saved" />
+<hx h-publisher="Deleted" />
+
+<hx h-proxy="getSource" />
+<hx h-proxy="setSource" />
+<hx h-proxy="getContextKey" />
+<hx h-proxy="setContextKey" />
+
+<div class="fieldLabel"><label>Name</label></div>
+<hx h-presenter="hxCore.Control.Presenter/TextBox" h-handle="name" class="editItem" />
+<div class="fieldLabel"><label>Location</label></div>
+<hx h-presenter="hxCore.Control.Presenter/TextBox" h-handle="location" class="editItem" />
+
+<hx h-presenter="hxCore.Control.Presenter/Button" h-handle="saveSourceButton" class="sourceButton" />
+<hx h-presenter="hxCore.Control.Presenter/Button" h-handle="deleteSourceButton" class="sourceButton" style="display:none;" />
+
+
+<script>
+
+    function PackageSource() {
+        this.packageSource = null;
+        this.contextKey = null;
+    }
+
+    PackageSource.prototype = {
+
+        start: function (parameters) {
+
+            var t = this;
+            console.log("PackageSource - ", parameters, t);
+
+            t.name.proxy.setDefaultText("(Enter Source Name)");
+            t.name.proxy.setHeight(22);
+            t.location.proxy.setDefaultText("(Enter Source Location)");
+            //t.location.proxy.setHeight(22);
+
+            t.saveSourceButton.proxy.setWidth(60);
+            t.saveSourceButton.proxy.setHeight(24);
+            t.saveSourceButton.proxy.setText("Create");
+            t.saveSourceButton.publisher.Clicked.subscribe(() => {
+
+                console.log("PackageSource - saveSourceButton.publisher.Clicked - ", t.packageSource);
+                
+                if (t.packageSource == null) {
+                    t.packageSource = {
+                        contextKey: t.contextKey
+                    };
+                }
+                t.packageSource.name = t.name.proxy.getText();
+                t.packageSource.location = t.location.proxy.getText();
+
+                t.hularion.router.request("hularion/state/context/packagesources/createorupdate", t.packageSource).then(response => {
+
+                    var created = (t.packageSource.key == null);
+
+                    t.packageSource.key = response.detail.key;
+                    t.deleteSourceButton.view.css("display", "");
+                    t.saveSourceButton.proxy.setText("Update");
+                    console.log("PackageSource - hularion/state/context/packagesources/createorupdate - ", response, t, t.packageSource);
+
+                    if (created) { t.hularion.publisher.Created.publish(t.packageSource); }
+                    else { t.hularion.publisher.Saved.publish(t.packageSource); }                    
+                });
+            });
+
+            t.deleteSourceButton.proxy.setWidth(60);
+            t.deleteSourceButton.proxy.setHeight(24);
+            t.deleteSourceButton.proxy.setText("Delete");
+            t.deleteSourceButton.publisher.Clicked.subscribe(() => {
+
+                if (t.packageSource == null) {
+                    return;
+                }
+
+                t.hularion.router.request("hularion/state/context/packagesources/delete", { key: t.packageSource.key }).then(response => {
+
+                    console.log("PackageSource - hularion/state/context/packagesources/delete - ", response);
+
+                    t.hularion.publisher.Deleted.publish();
+
+                });
+            });
+        },
+
+        getSource: function () {
+            return this.packageSource;
+        },
+
+        setSource: function (packageSource) {
+            var t = this;
+            t.packageSource = packageSource;
+            t.name.proxy.setText(packageSource.name);
+            t.location.proxy.setText(packageSource.location);
+            t.saveSourceButton.proxy.setText("Update");
+            t.deleteSourceButton.view.css("display", "");
+        },
+
+        getContextKey: function () {
+            return this.contextKey;
+        },
+
+        setContextKey: function (contextKey) {
+            this.contextKey = contextKey;
+        }
+
+    }
+
+</script>
+
+
+<style>
+    .this {
+        overflow-y:scroll;
+        height:150px;
+    }
+
+    .editItem {
+        width: 100%;
+    }
+
+    .fieldLabel{
+        width:100%;
+        overflow:hidden;
+        height:20px;
+    }
+
+    .sourceButton{
+        margin:0px 10px 0px 0px;
+    }
+
+</style>
+
+<style h-style-category-key="Theme" h-style-category-value="Light">
+    .this {
+        background-color: white;
+        color: black;
+        border-color: lightgray;
+    }
+</style>
+<style h-style-category-key="Theme" h-style-category-value="Dark">
+    .this {
+        background-color: black;
+        color: white;
+        border-color: darkgray;
+    }
+</style>
+

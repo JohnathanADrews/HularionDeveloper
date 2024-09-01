@@ -1,0 +1,423 @@
+﻿<!--
+MIT License
+
+Copyright (c) 2023 Johnathan A Drews
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+-->
+
+<hx h-publisher="EnterFullscreen" />
+<hx h-publisher="ExitFullscreen" />
+<hx h-publisher="ViewingApplication" />
+<!--<hx h-publisher="" />-->
+<hx h-proxy="setContext" />
+<hx h-proxy="selectApplication" />
+
+<div class="windowControl" h-handle="windowControl">
+
+    <hx h-handle="hxTabSystem" h-presenter="hxCore.Control.Presenter/TabSystem" class="hxTabSystem">
+        <hx h-handle="hxPlayerTabHeader" h-component="hxCore.Control.Presenter/TabHeader=>AddTabHeaderHandler" />
+    </hx>
+</div>
+
+<div class="viewerContainter" h-handle="viewer">
+    <hx h-handle="menu" h-presenter="hxCore.Control.Presenter/Menu">
+        <hx h-handle="menuItems.view" h-component="hxCore.Control.Presenter/MenuItem=>AddMenuItemHandler" h-start-parameter='{"name": "View"}'>
+            <hx h-handle="menuItems.view.Profile" h-component="hxCore.Control.Presenter/MenuItem=>AddMenuItemHandler" h-start-parameter='{"name": "Profile"}' h-subscribe="Clicked=>viewProfile"></hx>
+            <!--<hx h-handle="menuItems.view.EnterFullScreen" h-component="hxCore.Control.Presenter/MenuItem=>AddMenuItemHandler" h-start-parameter='{"name": "Full Screen (ctrl + alt + h to enter or exit)               "}' h-subscribe="Clicked=>enterFullScreen"></hx>-->
+            <!--<hx h-handle="menuItems.selectStyle" h-component="hxCore.Control.Presenter/MenuItem=>AddMenuItemHandler" h-start-parameter='{"name": "Select Style"}' h-subscribe="Clicked=>closePackage"></hx>-->
+        </hx>
+        <hx h-handle="menuItems.package" h-component="hxCore.Control.Presenter/MenuItem=>AddMenuItemHandler" h-start-parameter='{"name": "Package"}'>
+            <hx h-handle="menuItems.viewMyPackages" h-component="hxCore.Control.Presenter/MenuItem=>AddMenuItemHandler" h-start-parameter='{"name": "My Packages"}' h-subscribe="Clicked=>viewMyPackages" />
+            <hx h-handle="menuItems.viewPackages" h-component="hxCore.Control.Presenter/MenuItem=>AddMenuItemHandler" h-start-parameter='{"name": "View Packages"}' h-subscribe="Clicked=>viewPackages" />
+            <hx h-handle="menuItems.viewPackageSources" h-component="hxCore.Control.Presenter/MenuItem=>AddMenuItemHandler" h-start-parameter='{"name": "View Sources"}' h-subscribe="Clicked=>viewPackageSources" />
+            <hx h-handle="menuItems.buildPackage" h-component="hxCore.Control.Presenter/MenuItem=>AddMenuItemHandler" h-start-parameter='{"name": "Build Package"}' h-subscribe="Clicked=>buildPackage" />
+        </hx>
+        <hx h-handle="menuItems.project" h-component="hxCore.Control.Presenter/MenuItem=>AddMenuItemHandler" h-start-parameter='{"name": "Project"}'>
+            <hx h-handle="menuItems.createProject" h-component="hxCore.Control.Presenter/MenuItem=>AddMenuItemHandler" h-start-parameter='{"name": "Create Project"}' h-subscribe="Clicked=>viewProjectCreator" />
+        </hx>
+        <hx h-handle="menuItems.applications" h-component="hxCore.Control.Presenter/MenuItem=>AddMenuItemHandler" h-start-parameter='{"name": "Apps"}'>
+            <hx h-handle="menuItems.viewMyApplications" h-component="hxCore.Control.Presenter/MenuItem=>AddMenuItemHandler" h-start-parameter='{"name": "My Apps"}' h-subscribe="Clicked=>viewMyApplications" />
+        </hx>
+    </hx>
+    <div h-handle="viewerContent" class="viewerContent">
+
+        <hx h-handle="contextProfile" h-presenter="hxDeveloper.Presenter/ContextProfile" />
+
+
+    </div>
+</div>
+
+<hx h-presenter="hxCore.Control.Presenter/ContextMenu" h-handle="contextMenu" />
+<hx h-handle="fullscreenMenu" h-presenter="hxCore.Control.Presenter/FullscreenMenu">
+    <hx h-handle="fullscreenList" h-component="hxCore.Control.Presenter/VerticalList=>SetContent" />
+</hx>
+
+<script>
+
+    function HularionViewer() {
+        this.hxPlayerTab = null;
+        this.fullScreenContent = null;
+        this.isFullScreen = false;
+        this.appTabs = new Map();
+        this.cmiRefreshCurrentApp = null;
+        this.fsliEnterFullScreen = { title: "Enter Full Screen", show:true }
+        this.fsliExitFullScreen = { title: "Exit Full Screen", show:false }
+        this.fsliReloadApplication = { title: "Reload Application", show:false }
+        this.fsliReloadPlayer = { title: "Reload Hularion Player", show:false }
+    }
+
+    HularionViewer.prototype = {
+
+        start: function (options) {
+            
+            var t = this;
+
+            t.hxPlayerTabHeader.proxy.setText("Hularion Player");
+            t.hxPlayerTabHeader.proxy.disableClose();
+
+            t.hxPlayerTab = t.hxTabSystem.proxy.getTabGivenHeader(t.hxPlayerTabHeader);
+            t.hxPlayerTab.body.proxy.setContent(t.viewer);
+
+            t.hxTabSystem.publisher.TabSelected.subscribe((o, tab) => {
+                //console.log("HularionViewer TabSelected - ", t, tab);
+                if (tab == t.hxPlayerTab) {
+                    t.hularion.publisher.ViewingApplication.publish({ app: null });
+                }
+                else {
+                    var app = t.appTabs.get(tab);
+                    console.log("HularionViewer TabSelected - ", app);
+                    t.cmiRefreshCurrentApp.title = "Reload " + app.applicationTitle;
+                    t.fsliReloadApplication.title = "Reload " + app.applicationTitle;
+                    t.hularion.publisher.ViewingApplication.publish({ app: app });
+                }
+            });
+
+
+            t.contextMenu.proxy.setAttachElement(t.hularion.window.document);
+            var cmiViewProfile = { title: "View Profile", show: true };
+            t.contextMenu.proxy.addItem(cmiViewProfile);
+            var cmiRefreshHularionPlayer = { title: "Reload Hularion Player" };
+            t.contextMenu.proxy.addItem(cmiRefreshHularionPlayer);
+            t.cmiRefreshCurrentApp = { title: "Reload Current Application", show: false };
+            t.contextMenu.proxy.addItem(t.cmiRefreshCurrentApp);
+            t.contextMenu.publisher.ItemSelected.subscribe((o, item) => {
+                //console.log("HularionViewer.start contextMenu.ItemSelected - ", item);
+                if (item == cmiViewProfile) {
+                    t.cmiRefreshCurrentApp.show = false;
+                    cmiRefreshHularionPlayer.show = true;
+                    t.viewProfile();
+                }
+                if (item == cmiRefreshHularionPlayer) {
+                    t.hularion.router.request("hularion/hx/player/refresh", {});
+                }
+                if (item == t.cmiRefreshCurrentApp) {
+                    t.reloadApplication();
+                }
+            });
+            t.hularion.proxy.publisher.ViewingApplication.subscribe((o, eventInfo) => {
+                //console.log("HularionViewer.start t.hularion.proxy.publisher.ViewingApplication- ", o, eventInfo);
+                if (eventInfo.app == null) {
+                    t.cmiRefreshCurrentApp.show = false;
+                    cmiRefreshHularionPlayer.show = true;
+                }
+                else {
+                    t.cmiRefreshCurrentApp.show = true;
+                    cmiRefreshHularionPlayer.show = false;
+                }
+            });
+
+            t.fullscreenList.proxy.addItem(t.fsliEnterFullScreen);
+            t.fullscreenList.proxy.addItem(t.fsliExitFullScreen);
+            t.fullscreenList.proxy.addItem(t.fsliReloadApplication);
+            t.fullscreenList.proxy.addItem(t.fsliReloadPlayer);
+            t.fullscreenList.publisher.ItemSelected.subscribe((o, item) => {
+                if (item == t.fsliEnterFullScreen) {
+                    console.log("HularionViewer.start t.fullscreenList.publisher.ItemSelected - ", o, item);
+                    var tab = t.hxTabSystem.proxy.getSelectedTab();
+                    tab.body.proxy.showFullscreen();
+                    t.fullscreenMenu.proxy.hide();
+                }
+                if (item == t.fsliExitFullScreen) {
+                    var tab = t.hxTabSystem.proxy.getSelectedTab();
+                    tab.body.proxy.showInTab();
+                    t.fullscreenMenu.proxy.hide();
+                }
+                if (item == t.fsliReloadApplication) {
+                    t.reloadApplication();
+                    t.fullscreenMenu.proxy.hide();
+                }
+                if (item == t.fsliReloadPlayer) {
+                    t.hularion.router.request("hularion/hx/player/refresh", {});
+                    t.fullscreenMenu.proxy.hide();
+                }
+            });
+
+            t.setupFullScreenMenu(t.hularion.window);
+
+        },
+
+        setContext: function (context) {
+            var t = this;
+            t.context = context;
+            //console.log("setContext - ", t, context);
+            t.contextProfile.proxy.setContext(context);
+        },
+
+        viewProfile: function () {
+            var t = this;
+            t.viewerContent.empty();
+            t.viewerContent.append(t.contextProfile.view);
+            t.hxTabSystem.proxy.selectTab(t.hxPlayerTab);
+        },
+
+        viewPackageSources: function (x, y) {
+            var t = this;
+            //console.log("viewPackageSources - ", t, hxPlayer);
+            var sourceManager = hxDeveloper.Presenter.presenters.PackageSourceManager.create();
+            sourceManager.proxy.setUserContextKey(t.context.key);
+            sourceManager.proxy.load();
+            sourceManager.publisher.PackageSourceCreated.subscribe((o, source) => {
+                //console.log("viewPackageSources - source ", source, t);
+                t.context.packageSources.items.push(source);
+            });
+            t.setViewerContent(sourceManager.view);
+        },
+
+
+        viewPackages: function () {
+            var t = this;
+            //console.log("viewPackages - ", t);
+
+            var sourceKeys = [];
+            for (var i = 0; i < t.context.packageSources.items.length; i++) {
+                sourceKeys.push(t.context.packageSources.items[i].key);
+            }
+
+            viewer = hxDeveloper.Presenter.presenters.PackagesViewer.create();
+            viewer.proxy.setContextKey(t.context.key);
+            viewer.publisher.RunApplication.subscribe((o, appInfo) => {
+                t.runApplication(appInfo);
+            });
+            viewer.publisher.InstallApplication.subscribe((o, package) => {
+                var installer = hxDeveloper.Presenter.presenters.PackageInstaller.create();
+                installer.proxy.setContextKey(t.context.key);
+                console.log("HularionViewer.viewPackages - ", package);
+                installer.proxy.loadPackageDetails(package.packageKey, package.version).then(() => {
+                    t.setViewerContent(installer.view);
+                });
+            });
+            viewer.proxy.loadPackages(sourceKeys).then(() => {
+                t.setViewerContent(viewer.view);
+            });
+        },
+
+        viewMyPackages: function () {
+            var t = this;
+            //console.log("viewMyPackages - ", t);
+
+            t.hularion.router.request("hularion/state/context/packages/get", { contextKey: t.context.key }).then(response => {
+                //console.log("HularionViewer.start context/packages/get - ", response);
+
+
+                viewer = hxDeveloper.Presenter.presenters.MyPackagesViewer.create();
+                viewer.proxy.setContextKey(t.context.key);
+                viewer.proxy.setPackages(response.detail.packages);
+                viewer.publisher.RunApplication.subscribe((o, appInfo) => {
+                    t.runApplication(appInfo);
+                });
+                t.setViewerContent(viewer.view);
+            });
+
+        },
+
+        selectApplication: function () {
+
+        },
+
+        reloadApplication: function () {
+            var t = this;
+            //console.log("HularionViewer.reloadApplication- ", t);
+            var tab = t.hxTabSystem.proxy.getSelectedTab();
+            if (!t.appTabs.has(tab)) {
+                return;
+            }
+            t.setupIframe(tab, t.appTabs.get(tab));
+        },
+
+        runApplication: function (appInfo, options) {
+            var t = this;
+            console.log("HularionViewer.runApplication- ", appInfo);
+            var tab = t.hxTabSystem.proxy.createTab();
+            t.appTabs.set(tab, appInfo);
+            tab.header.proxy.setText(appInfo.applicationName);
+            tab.header.publisher.Close.subscribe(() => {
+                t.hxTabSystem.proxy.removeTab(tab);
+                t.appTabs.remove(tab);
+            });
+            t.hxTabSystem.proxy.addTab(tab);
+            t.hxTabSystem.proxy.selectTab(tab);
+            t.hularion.publisher.ViewingApplication.publish({ app: appInfo });
+            t.cmiRefreshCurrentApp.title = "Reload " + appInfo.applicationName;
+            t.fsliReloadApplication.title = "Reload " + appInfo.applicationName;
+            t.setupIframe(tab, appInfo);
+        },
+
+        setupIframe: function (tab, appInfo) {
+            var t = this;
+            //console.log("HularionViewer.setupIframe - ", t);
+            t.hularion.router.request("hularion/hx/application/iframe/get?rebuild=true", appInfo).then(response => {
+                //console.log("HularionViewer.setupIframe iframe - ", response.detail);
+                t.hularion.window.addEventListener("resize", () => {
+                    response.detail.iframe.style.height = (t.hularion.window.innerHeight - t.hxTabSystem.proxy.getHeaderBottom() - 18) + "px";
+                });
+                response.detail.iframe.style.height = (t.hularion.window.innerHeight - t.hxTabSystem.proxy.getHeaderBottom() - 18) + "px";
+
+                tab.body.proxy.setContent(response.detail.iframe);
+                t.setupFullScreenMenu(response.detail.iframe.contentWindow);
+                t.setupFrameContextMenu(response.detail.iframe.contentWindow);
+            });
+        },
+
+        enterFullScreen: function () {
+            var t = this;
+            var tab = t.hxTabSystem.proxy.getSelectedTab();
+            tab.body.proxy.showFullscreen();
+        },
+
+        exitFullScreen: function () {
+            var t = this;
+            var tab = t.hxTabSystem.proxy.getSelectedTab();
+            tab.body.proxy.showInTab();
+        },
+
+        setViewerContent: function (content) {
+            var t = this;
+            t.viewerContent.empty();
+            t.viewerContent.append(content);
+        },
+
+        setupFullScreenMenu: function (frame) {
+            var t = this;
+            frame.addEventListener("keydown", (keyEvent) => {
+                if (keyEvent.keyCode == 72 && keyEvent.altKey === true && keyEvent.ctrlKey === true && t.fullscreenMenu.proxy.isVisible() === false) {
+                    var tab = t.hxTabSystem.proxy.getSelectedTab();
+                    if (tab.body.proxy.isFullscreen() === true) {
+                        t.fsliEnterFullScreen.show = false;
+                        t.fsliExitFullScreen.show = true;
+                    }
+                    else {
+                        t.fsliEnterFullScreen.show = true;
+                        t.fsliExitFullScreen.show = false;
+                    }
+                    if (tab == t.hxPlayerTab) {
+                        t.fsliReloadApplication.show = false;
+                        t.fsliReloadPlayer.show = true;
+                    }
+                    else {
+                        t.fsliReloadApplication.show = true;
+                        t.fsliReloadPlayer.show = false;
+                    }
+                    t.fullscreenList.proxy.refresh();
+                    t.fullscreenMenu.proxy.show();
+                    return;
+                };
+                if (keyEvent.keyCode == 72 && keyEvent.altKey === true && keyEvent.ctrlKey === true && t.fullscreenMenu.proxy.isVisible() === true) {
+                    t.fullscreenMenu.proxy.hide();
+                    return;
+                }
+            });
+
+        },
+
+        setupFrameContextMenu: function (frame) {
+            frame.addEventListener("contextmenu", (e) => {
+                e.preventDefault();
+            });
+        },
+
+        buildPackage: function () {
+            var t = this;
+            console.log("HularionViewer.buildPackage - ", t);
+            var builder = hxDeveloper.Presenter.presenters.PackageBuilder.create();
+            t.setViewerContent(builder.view);
+        },
+
+        viewMyApplications: function () {
+            var t = this;
+            console.log("HularionViewer.viewMyApplications - ", t);
+            var viewer = hxDeveloper.Presenter.presenters.ApplicationsView.create();
+            viewer.proxy.setContextKey(t.context.key);
+            viewer.proxy.getApplications().then(() => {
+                console.log("HularionViewer.viewMyApplications getApplications - ", viewer);
+                t.setViewerContent(viewer.view);
+            });
+            viewer.publisher.RunApplication.subscribe((o, appInfo) => {
+                t.runApplication(appInfo);
+            });
+
+            
+        },
+
+        viewProjectCreator: function () {
+            var t = this;
+            console.log("HularionViewer.viewProjectCreator - ", t);
+            var proxy = hxDeveloper.Presenter.presenters.ProjectCreator.create();
+            t.setViewerContent(proxy.view);
+        }
+
+    }
+
+</script>
+
+
+<style>
+    .this {
+        user-select: none;
+        display: inline-block;
+        width: 100%;
+        border: solid 2px white;
+    }
+
+        .this * {
+            user-select: none;
+        }
+
+    .menu-container {
+        margin: 0px 0px 0px 0px;
+    }
+
+    .this > .display {
+        margin-top: 10px;
+    }
+
+
+    .hxTabSystem {
+        width: 100%;
+    }
+
+
+    .viewerContent {
+        margin-top: 6px;
+        padding:10px;
+    }
+</style>
+
+<style h-style-category-key="Theme" h-style-category-value="Light">
+    .this {
+        background-color: white;
+        color: black;
+    }
+</style>
+<style h-style-category-key="Theme" h-style-category-value="Dark">
+    .this {
+        background-color: black;
+        color: white;
+    }
+</style>
+

@@ -1,0 +1,119 @@
+﻿<!--
+MIT License
+
+Copyright (c) 2023 Johnathan A Drews
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+-->
+
+<div h-handle="player">
+    <hx h-handle="loadingScreen" h-presenter="hxDeveloper.Presenter/LoadingScreen" />
+</div>
+<div h-handle="fullScreen" class="fullScreen" style="display:none;"></div>
+
+
+<script>
+
+    function HularionPlayer() {
+    }
+
+    HularionPlayer.prototype = {
+
+        start: function (options) {
+
+            var t = this;
+            console.log("HularionPlayer.start - ", options, t, window.hxPlayer, window.hxCore);
+
+
+            t.hularion.router.getRoutes().then(routes => {
+                console.log("HularionPlayer.start routes - ", routes);
+            });
+
+
+            var getState = () => {
+                t.hularion.router.request("hularion/state/get", null).then(response => {
+                    //console.log("HularionPlayer.start hularion/state/get- ", response);
+                    if (response.detail.state.contexts.items.length == 1) {
+                        t.viewer = hxDeveloper.Presenter.presenters.HularionViewer.create();
+                        t.viewer.proxy.setContext(response.detail.state.contexts.items[0]);
+
+                        t.viewer.publisher.EnterFullscreen.subscribe((o, view) => {
+                            console.log("HularionPlayer.start EnterFullscreen- ", o, view);
+                            t.fullScreen.empty();
+                            t.fullScreen.append(view);
+                            t.fullScreen.css("display", "");
+                        });
+
+                        t.viewer.publisher.ExitFullscreen.subscribe((o, view) => {
+                            console.log("HularionPlayer.start ExitFullscreen- ", o, view);
+                            t.fullScreen.css("display", "none");
+                            t.fullScreen.empty();
+                        });
+
+
+                        t.player.empty();
+                        t.player.append(t.viewer.view);
+                    }
+                    else if (response.detail.state.contexts.items.length > 1) {
+                        //Select Context
+                    }
+                    else {
+                        t.newInstance = hxDeveloper.Presenter.presenters.NewInstance.create();
+                        t.newInstance.publisher.AgreementAccepted.subscribe(() => {
+                            getState();
+                        });
+                        t.player.empty();
+                        t.player.append(t.newInstance.view);
+                    }
+                });
+
+
+            };
+
+            //getState();
+
+        }
+    }
+
+</script>
+
+
+<style>
+    .this {
+        user-select: none;
+    }
+    .this * {
+        user-select: none;
+    }
+
+    .fullScreen{
+        position:absolute;
+        top:0;
+        left:0;
+        width:100%;
+        height:100%;
+        padding:0;
+        margin:0;
+        background-color:inherit;
+    }
+
+</style>
+
+<style h-style-category-key="Theme" h-style-category-value="Light">
+    .this {
+        background-color: white;
+        color: black;
+    }
+</style>
+<style h-style-category-key="Theme" h-style-category-value="Dark">
+    .this {
+        background-color: black;
+        color: white;
+    }
+</style>
+
