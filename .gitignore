@@ -1,0 +1,8 @@
+
+*.vs
+obj/
+bin/
+*.user
+properties/
+*.pubxml
+.hx/
