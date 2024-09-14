@@ -1,0 +1,287 @@
+﻿<!--
+MIT License
+
+Copyright (c) 2023 Johnathan A Drews
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+-->
+
+<hx h-proxy="setSeparator" h-method="setSeparator" />
+<hx h-proxy="addPath" h-method="addPath" />
+<hx h-proxy="selectPath" h-method="selectPath" />
+<hx h-proxy="setName" h-method="setName" />
+<hx h-proxy="setColor" h-method="setColor" />
+<hx h-proxy="getSelectedIndex" h-method="getSelectedIndex" />
+<hx h-proxy="getSelectedSegment" h-method="getSelectedSegment" />
+<hx h-proxy="getPath" h-method="getPath" />
+<hx h-proxy="getSegmentRange" />
+<hx h-proxy="clearAtIndex" />
+
+<hx h-publisher="SegmentSelected" />
+<hx h-publisher="SegmentPreviewed" />
+
+
+<ul class="pathList" h-handle="pathList">
+    <li h-clone="segmentName" class='segmentName'><span></span></li>
+    <li h-clone="segmentSeparator" class='segmentSeparator'></li>
+</ul>
+
+<div h-clone="separator" class="separator"></div>
+
+<script>
+
+    function ViewNavigationPath() {
+        this.navigationArray = null;
+        this.previewedPath = null;
+        this.segmentMap = new Map();
+        this.separator = null;
+    }
+
+    ViewNavigationPath.prototype = {
+
+        start: function () {
+            var t = this;
+        },
+
+        setSeparator: function (separator) {
+            this.separator = separator;
+        },
+
+        //Creates a path segment and returns the jquery object for that segment.
+        //When the segment is selected, the method will be called with the segment as a parameter.
+        addPath: function (segmentName, index) {
+            var t = this;
+            if (index == null) { index = t.segmentMap.size; }
+            if (t.previewedPath != null) {
+                t.previewedPath.view.removeClass("previewed");
+                t.previewedPath.view.nextAll().remove();
+                t.previewedPath = null;
+            }
+
+            var segment = t.hularion.createClone("segmentName");
+            segment.name = segmentName;
+            segment.index = index;
+            segment.view.find("span").html(segmentName);
+            var items = t.pathList.find("li");
+            if (items.length != 0 && !items.last().hasClass("segmentSeparator")) {
+                var segmentSeparator = t.hularion.createClone("segmentSeparator");
+                if (t.separator == null) {
+                    segmentSeparator.view.append(t.hularion.createClone("separator").view);
+                }
+                else {
+                    segmentSeparator.view.append(t.separator.cloneNode(true));
+                }
+                t.pathList.append(segmentSeparator.view);
+            }
+            segment.view.on("click", function () {
+                if (t.previewedPath != segment) {
+                    t.previewPath(segment);
+                }
+                else {
+                    t.selectPath(segment);
+                }
+            });
+            t.pathList.append(segment.view);
+            t.hightlightPath(segment);
+            t.segmentMap.set(index, segment);
+            return segment;
+        },
+
+        selectPath: function (segment) {
+            if (segment.view.nextAll().length == 0) { return; }
+            var t = this;
+            segment.view.nextAll().remove();
+            t.hightlightPath(segment);
+            t.hularion.publisher.SegmentSelected.publish(segment.index);
+        },
+
+        previewPath: function (segment) {
+            var t = this;
+            if (segment == t.previewedPath) { return; }
+            t.pathList.find(".segmentName").removeClass("previewed");
+            t.hightlightPath(segment);
+            t.hularion.publisher.SegmentPreviewed.publish(segment.index);
+        },
+
+        hightlightPath: function (segment) {
+            var t = this;
+            t.previewedPath = segment;
+            t.previewedPath.view.addClass("previewed");
+        },
+
+        getSelectedIndex: function () {
+            var t = this;
+            if (t.previewedPath == null) { return -1; }
+            return t.previewedPath.index;
+        },
+
+        getSelectedSegment: function () {
+            var t = this;
+            return t.segmentMap.get(t.getSelectedIndex());
+        },
+
+        setName: function (segment, name) {
+            var t = this;
+            segment.view.find("span").html(name);
+        },
+
+        setColor: function (color) {
+            this.pathList.css("color", color);
+        },
+
+        getPath: function (delimiter) {
+            var t = this;
+            if (delimiter == null) { delimiter = ""; }
+            var path = [];
+            algorithm.control.processArray(t.pathList.find(".segmentName span"), segment => {
+                path.push(segment.innerHTML);
+                //    path.push(delimiter);
+            });
+            //path.splice(path.length - 1, 1);
+            return path.join(delimiter);
+        },
+
+        getSegmentRange: function (startIndex, endIndex) {
+            var t = this;
+            var result = [];
+            algorithm.control.processIterator(startIndex, endIndex, i => {
+                //console.log("getSegmentRange - ", i, t.segmentMap.get(i));
+                result.push(t.segmentMap.get(i).name);
+            });
+            return result;
+        },
+
+        clearAtIndex: function (index) {
+            var t = this;
+            //console.log("clearAtIndex - ", index, t.segmentMap, t);
+            if (t.segmentMap.has(index)) {
+                var segment = t.segmentMap.get(index).view;
+                segment.nextAll().remove();
+                segment.remove();
+            }
+            if (t.previewedPath != null && t.previewedPath.index >= index) {
+                t.previewedPath = null;
+            }
+            algorithm.control.processIterator(index, t.segmentMap.size - 1, i => {
+                t.segmentMap.delete(i);
+            });
+        }
+    }
+
+</script>
+
+<style>
+    .this * {
+        user-select: none;
+    }
+
+    .pathList {
+        list-style-type: none;
+        text-align: left;
+        display: inline-block;
+        margin: 0;
+        padding:0;
+    }
+
+    .pathList li {
+        float: left;
+    }
+
+    .segmentName  {
+    }
+
+    .segmentName * {
+        cursor: pointer;
+        padding: 0px 2px 0px 2px;
+    }
+
+    .segmentSeparator {
+        cursor: default;
+    }
+
+    .separator {
+        width: 15px;
+        height: 15px;
+        margin-top: 3px;
+    }
+</style>
+
+<style h-style-category-key="Theme" h-style-category-value="Light">
+    .this {
+        background-color: white;
+    }
+
+    .segmentName > *:hover {
+        color: white;
+        background-color: black;
+    }
+
+    .separator {
+        background: radial-gradient(ellipse at center, rgba(255,255,255,100) 0%,#000000 48%,#000000 52%, rgba(0,0,0,0) 52%, rgba(0,0,0,0) 100%);
+    }
+
+    .previewed {
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0) 80%, rgba(0, 0, 0, 1) 82%, rgba(0, 0, 0, 1) 83%, rgba(0, 0, 0, 0) 90%);
+    }
+</style>
+
+<style h-style-category-key="Theme" h-style-category-value="Dark">
+    .this {
+        background-color: black;
+    }
+
+    .segmentName > *:hover {
+        color: black;
+        background-color: white;
+    }
+
+    .separator {
+        background: radial-gradient(ellipse at center, rgba(255,255,255,100) 0%,#000000 48%,#000000 52%, rgba(0,0,0,0) 52%, rgba(0,0,0,0) 100%);
+    }
+
+    .previewed {
+        background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 80%, rgba(255, 255, 255, 1) 82%, rgba(255, 255, 255, 1) 83%, rgba(0, 0, 0, 0) 90%);
+    }
+</style>
+
+
+<style h-style-category-key="Structure" h-style-category-value="Standard">
+    .this > .pathList {
+        padding-left: 5px;
+        padding-right: 5px;
+        margin: 0;
+    }
+
+    .pathList li {
+        margin: 0;
+        padding: 2px;
+    }
+
+    .segmentName * {
+        font-size: 18px;
+    }
+
+    .segmentName {
+        padding-left: 2px;
+        padding-right: 2px;
+    }
+
+    .segmentSeparator {
+        margin: 6px;
+        padding-top: 4px;
+    }
+
+    .segmentName > *:hover {
+        font-weight: bold;
+        border-radius: 4px;
+        padding-left: 2px;
+        padding-right: 2px;
+    }
+
+</style>
+

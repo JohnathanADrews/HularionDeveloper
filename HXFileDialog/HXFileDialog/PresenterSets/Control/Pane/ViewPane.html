@@ -1,0 +1,95 @@
+﻿<!--
+MIT License
+
+Copyright (c) 2023 Johnathan A Drews
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+-->
+
+<hx h-proxy="setContent" />
+<!--<hx h-proxy="setLeft" />
+<hx h-proxy="setRight" />
+<hx h-proxy="setTop" />
+<hx h-proxy="setBottom" />-->
+
+<div h-handle="display" class="viewPaneDisplay"></div>
+
+
+<script>
+
+    function ViewPane() {
+        //this.left = 0;
+        //this.right = 0;
+        //this.top = 0;
+        //this.bottom = 0;
+        //this.width = 0;
+        //this.height = 0;
+        //this.isFixedWidth = false;
+        //this.isFixedHeight = false;
+    }
+
+    ViewPane.prototype = {
+
+        start: function () {
+            var t = this;
+            console.log("ViewPane.start - ", t, window);
+
+
+            t.hularion.window.addEventListener("resize", e => {
+                t.hularion.principal.width(t.hularion.window.innerWidth - 10);
+                t.hularion.principal.height(t.hularion.window.innerHeight - 10);
+            });
+            t.hularion.principal.width(t.hularion.window.innerWidth - 10);
+            t.hularion.principal.height(t.hularion.window.innerHeight - 10);
+        },
+
+        setContent: function (content) {
+            this.display.empty();
+            this.display.append(content);
+        },
+
+        //setLeft: function (left) {
+
+        //},
+
+        //setRight: function (right) {
+
+        //},
+
+        //setTop: function (top) {
+
+        //},
+
+        //setBottom: function (bottom) {
+
+        //}
+    }
+
+</script>
+
+<style>
+    .this {
+        position:absolute;
+        overflow-y:scroll;
+    }
+
+    .viewPaneDisplay{
+        width: calc(100% - 10px);
+    }
+</style>
+
+<style h-style-category-key="Theme" h-style-category-value="Light">
+</style>
+
+<style h-style-category-key="Theme" h-style-category-value="Dark">
+</style>
+
+<style h-style-category-key="Structure" h-style-category-value="Standard">
+</style>
+
+

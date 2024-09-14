@@ -1,0 +1,151 @@
+﻿<!--
+MIT License
+
+Copyright (c) 2023 Johnathan A Drews
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+-->
+<hx h-publisher="Changed" />
+
+<hx h-proxy="setValue" h-method="setValue" />
+<hx h-proxy="getValue" h-method="getValue" />
+
+<div class="editMode" h-handle="editMode" style="display: inline-block;">
+    <div class="booleanValue unselectedBooleanValue booleanTrue" h-handle="booleanTrue"><label>True</label></div>
+    <div class="booleanValue unselectedBooleanValue booleanFalse" h-handle="booleanFalse"><label>False</label></div>
+</div>
+<div class="displayMode" h-handle="displayMode">
+    <label class="displayValue" h-handle="displayValue"></label>
+</div>
+
+<script>
+
+    function BooleanEditor() {
+    }
+
+    BooleanEditor.prototype = {
+
+        Start: function () {
+            var t = this;
+            t.displayValue.on("click", function () {
+                t.displayMode.addClass("hide");
+                t.editMode.css("display", "inline-block");
+            });
+            t.booleanTrue.on("click", function () {
+                t.setValue(true);
+            });
+            t.booleanFalse.on("click", function () {
+                t.setValue(false);
+            });
+            t.setValue(false);
+        },
+
+        getValue: function () {
+            return this.value;
+        },
+
+        setValue: function (value) {
+            var t = this;
+            var old = t.value;
+            t.value = value;
+            //console.log("BooleanEditor.setValue - ", value, t);
+            if (value) {
+                t.displayValue[0].innerHTML = t.booleanTrue[0].innerHTML
+                t.displayValue.addClass("booleanTrueDisplayValue");
+                t.displayValue.removeClass("booleanFalseDisplayValue");
+
+                t.booleanTrue.addClass("selectedBooleanValue");
+                t.booleanTrue.removeClass("unselectedBooleanValue");
+                t.booleanFalse.addClass("unselectedBooleanValue");
+                t.booleanFalse.removeClass("selectedBooleanValue");
+            }
+            else {
+                t.displayValue[0].innerHTML = t.booleanFalse[0].innerHTML;
+                t.displayValue.addClass("booleanFalseDisplayValue");
+                t.displayValue.removeClass("booleanTrueDisplayValue");
+
+                t.booleanTrue.addClass("unselectedBooleanValue");
+                t.booleanTrue.removeClass("selectedBooleanValue");
+                t.booleanFalse.addClass("selectedBooleanValue");
+                t.booleanFalse.removeClass("unselectedBooleanValue");
+            }
+            t.editMode.css("display", "none");
+
+            if (old ^ value) {
+                //console.log("BooleanEditor.setValue - changed - ", value);
+                t.hularion.publisher.Changed.publish(value);
+            }
+
+            t.displayMode.removeClass("hide");
+        }
+    }
+
+</script>
+
+<style>
+
+    .this {
+        cursor: pointer;
+    }
+
+        .this * {
+            cursor: pointer;
+        }
+
+    .editMode {
+        width: 80px;
+    }
+
+    .booleanValue {
+        float: left;
+        border: solid 1px;
+        padding-left: 2px;
+        padding-right: 2px;
+        height: 18px;
+    }
+
+    .selectedBooleanValue {
+        background-color: rgba(0,0,200,.2);
+    }
+
+    .displayValue {
+        cursor: pointer;
+    }
+
+    .unselectedBooleanValue {
+        background-color: rgba(255,255,255,.3);
+    }
+
+        .unselectedBooleanValue:hover {
+            background-color: rgba(255,255,255,.6);
+            border-color: gold;
+        }
+
+    .booleanTrueDisplayValue {
+        color: #224127;
+    }
+
+    .booleanFalseDisplayValue {
+        color: #491701;
+    }
+</style>
+
+
+
+<style h-style-category-key="Theme" h-style-category-value="Light">
+    .this {
+        background-color: white;
+        color: black;
+    }
+</style>
+<style h-style-category-key="Theme" h-style-category-value="Dark">
+    .this {
+        background-color: black;
+        color: white;
+    }
+</style>

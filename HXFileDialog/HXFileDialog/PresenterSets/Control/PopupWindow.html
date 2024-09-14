@@ -1,0 +1,278 @@
+﻿<!--
+MIT License
+
+Copyright (c) 2023 Johnathan A Drews
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+-->
+
+
+<hx h-publisher="SizeChanged" />
+
+<hx h-proxy="setContent" />
+<hx h-proxy="setTitle" />
+<hx h-proxy="setHeader" />
+<hx h-proxy="setFooter" />
+<hx h-proxy="setFooterMessage" />
+<hx h-proxy="setSize" />
+<hx h-proxy="setPosition" />
+<hx h-proxy="move" />
+<hx h-proxy="centerOnWindow" />
+<hx h-proxy="addHeaderItem" />
+
+
+<hx h-presenter="SizeablePane" h-handle="sizeablePane" />
+<hx h-presenter="DraggablePane" h-handle="draggablePane" />
+
+<div h-handle="content" class="popupWindowContent" style="overflow:hidden;" >
+    <div h-handle="header" class="popupWindowHeader" >
+        <div h-handle="headerContainer" class="headerContainer">
+            <div h-handle="titleContainer" class="titleContainer"><label h-handle="headerTitle"></label></div>
+            <div h-handle="headerItemContainer"></div>
+        </div>
+    </div>
+    <div h-handle="body" class="popupWindowBody"></div>
+    <div h-handle="footer" class="popupWindowFooter"><label h-handle="footerMessage" class="footerMessage"></label></div>
+</div>
+
+<div h-clone="headerItem" class="headerItem"></div>
+
+<script>
+
+    function PopupWindow() {
+        this.headerHeight = 24;
+        this.footerHeight = 24;
+        this.sizeBuffer = 0;
+        this.headerItemWidth = 18;
+        this.headerItemHeight = 18;
+        this.headerMargin = 5;
+        this.headerItems = [];
+    }
+
+    PopupWindow.prototype = {
+
+        start: function () {
+            var t = this;
+            //console.log("PopupWindow.start - ", t);
+
+            t.sizeBuffer = t.sizeablePane.proxy.getSizeBuffer();
+            t.sizeablePane.proxy.setContent(t.content[0]);
+            t.draggablePane.proxy.setContent(t.headerContainer[0]);
+            t.header.append(t.draggablePane.view);
+
+            t.sizeablePane.publisher.SizeChanged.subscribe((o, size) => {
+                t.setContentSize(size);
+            });
+            t.draggablePane.publisher.DragDelta.subscribe((o, delta) => {
+                t.move(delta.dx, delta.dy);
+            });
+
+
+        },
+
+        setContent: function (content) {
+            this.body.append(content);
+        },
+
+        setHeader: function (header) {
+            this.header[0].innerHTML = header;
+        },
+
+        setTitle: function (title) {
+            this.headerTitle[0].innerHTML = title;
+        },
+
+        setFooter: function (footer) {
+            this.footer[0].innerHTML = footer;
+        },
+
+        setFooterMessage: function (message) {
+            this.footerMessage[0].innerHTML = message;
+        },
+
+        setWidth: function (width) {
+            var t = this;
+            t.content.width(width);
+            t.header.width(width);
+            t.body.width(width);
+            t.footer.width(width);
+            t.setHeaderWidths();
+            t.draggablePane.proxy.setWidth(width);
+        },
+
+        setHeight: function (height) {
+            var t = this;
+            t.content.height(height);
+            t.header.height(t.headerHeight);
+            t.body.height(height - t.headerHeight - t.footerHeight);
+            t.footer.height(t.footerHeight);
+            t.draggablePane.proxy.setHeight(t.headerHeight);
+        },
+
+        setSize: function (width, height) {
+            var t = this;
+            t.sizeablePane.proxy.setSize(width, height);
+            t.setContentSize(width - (2 * t.sizeBuffer), height - (2 * t.sizeBuffer));
+        },
+
+        setContentSize: function (size) {
+            var t = this;
+            t.setWidth(size.contentWidth);
+            t.setHeight(size.contentHeight);
+
+            var windowSize = {
+                windowWidth: size.paneWidth,
+                windowHeight: size.paneHeight,
+                contentWidth: size.contentWidth,
+                contentHeight: size.contentHeight,
+                headerWidth: t.header.width(),
+                headerHeight: t.header.height(),
+                bodyWidth: t.body.width(),
+                bodyHeight: t.body.height(),
+                footerWidth: t.footer.width(),
+                footerHeight: t.footer.height(),
+            };
+            t.hularion.publisher.SizeChanged.publish(windowSize);
+        },
+
+        setPosition: function (x, y) {
+            var t = this;
+            t.sizeablePane.proxy.setPosition(x, y);
+        },
+
+        move: function (dx, dy) {
+            var t = this;
+            t.sizeablePane.proxy.move(dx, dy);
+        },
+
+        centerOnWindow: function () {
+            var t = this;
+            t.sizeablePane.proxy.centerOnWindow();
+
+        },
+
+        setHeaderWidths: function () {
+            var t = this;
+            var width = t.header.width();
+            var itemsWidth = t.headerItems.length * (t.headerItemWidth + t.headerMargin);
+            t.titleContainer.width(width - itemsWidth);
+            t.headerItemContainer.width(itemsWidth);
+        },
+
+        addHeaderItem: function (view) {
+            var t = this;
+            var item = t.hularion.createClone("headerItem");
+            t.headerItems.push(item);
+            item.view.width(t.headerItemWidth);
+            item.view.css("margin-right", t.headerMargin);
+            item.view.height(t.headerItemHeight);
+            item.view.append(view);
+            t.headerItemContainer.append(item.view);
+        }
+    }
+
+</script>
+
+<style>
+
+    .this {
+        width:0;
+        height:0;
+        margin:0;
+        padding:0;
+    }
+
+    .this > * {
+        border-style: solid;
+        border-width: 1px;
+    }
+
+    .popupWindowContent{
+        background-color:gray;
+    }
+
+    .popupWindowHeader {
+        overflow: hidden;
+        /*background-color: blue;*/
+    }
+
+    .popupWindowBody {
+        overflow:hidden;
+        /*background-color: green;*/
+    }
+
+    .popupWindowFooter {
+        overflow: hidden;
+        /*background-color: red;*/
+    }
+
+    .footerMessage{
+        position:relative;
+        left:10px;
+        top:3px;
+    }
+
+    .titleContainer {
+        display: inline-block;
+        height: 20px;
+        overflow: hidden;
+    }
+    .titleContainer > * {
+        float: left;
+        margin-left: 8px;
+        margin-top: 2px;
+    }
+
+    .headerContainer {
+        display: inline-block;
+    }
+
+    .headerContainer > * {
+        float: left;
+    }
+
+    .headerItem {
+        float: right;
+        margin-top: 2px;
+    }
+
+</style>
+
+<style h-style-category-key="Theme" h-style-category-value="Light">
+    .this > * {
+        background: linear-gradient(15deg, rgb(20,20,20) 0%, rgb(50,50,50) 40%, rgb(100,100,100) 60%, black 80%, black 100%);
+        border-color: gray;
+    }
+
+    .popupWindowHeader {
+        background: linear-gradient(90deg, rgb(220,220,220) 0%, rgb(250,250,250) 40%, rgb(200,200,200) 60%, white 80%, white 100%);
+    }
+
+    .popupWindowFooter {
+        background: linear-gradient(270deg, rgb(220,220,220) 0%, rgb(250,250,250) 40%, rgb(200,200,200) 60%, white 80%, white 100%);
+    }
+</style>
+
+<style h-style-category-key="Theme" h-style-category-value="Dark">
+    .this > * {
+        background: linear-gradient(15deg, rgb(20,20,20) 0%, rgb(50,50,50) 40%, rgb(100,100,100) 60%, black 80%, black 100%);
+        border-color:gray;
+    }
+
+    .popupWindowHeader {
+        background: linear-gradient(90deg, rgb(20,20,20) 0%, rgb(50,50,50) 40%, rgb(100,100,100) 60%, black 80%, black 100%);
+    }
+
+    .popupWindowFooter {
+        background: linear-gradient(270deg, rgb(20,20,20) 0%, rgb(50,50,50) 40%, rgb(100,100,100) 60%, black 80%, black 100%);
+    }
+
+</style>
+
+
+

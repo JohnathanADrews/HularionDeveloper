@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net7.0-windows</TargetFramework>
+    <TargetFramework>net8.0-windows7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
     <ApplicationIcon>HularionIcon.ico</ApplicationIcon>
@@ -76,24 +76,24 @@
 
   <ItemGroup>
     <PackageReference Include="CefSharp.Wpf.NETCore" Version="114.2.120" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\HularionCore\HularionCore.csproj" />
-    <ProjectReference Include="..\HularionExperience.Embedded\HularionExperience.Embedded.csproj" />
-    <ProjectReference Include="..\HularionMesh.Connector.Sqlite\HularionMesh.Connector.Sqlite.csproj" />
-    <ProjectReference Include="..\HularionMesh.Serializer.Json\HularionMesh.Serializer.Json.csproj" />
-    <ProjectReference Include="..\HularionPlugin.PluginMeta\HularionPlugin.PluginMeta.csproj" />
-    <ProjectReference Include="..\HularionPlugin\HularionPlugin.csproj" />
-    <ProjectReference Include="..\HXCore\HXCore.csproj" />
-    <ProjectReference Include="..\HXFileDialog\HXFileDialog.csproj" />
-    <ProjectReference Include="..\HXUserState\HXUserState.csproj" />
+    <PackageReference Include="HularionExperience" Version="3.0.0" />
+    <PackageReference Include="HularionExperience.Embedded" Version="3.0.0" />
+    <PackageReference Include="HularionMesh" Version="3.0.0" />
+    <PackageReference Include="HularionMesh.Connector.Sqlite" Version="3.0.0" />
+    <PackageReference Include="HularionMesh.Serializer.Json" Version="3.0.0" />
+    <PackageReference Include="HularionPlugin.PluginMeta" Version="3.0.1" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="HX\HularionExperience\ScriptSets\" />
     <Folder Include="Plugin\Project\Response\" />
     <Folder Include="Plugin\Project\Request\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HXCore\HXCore.csproj" />
+    <ProjectReference Include="..\HXFileDialog\HXFileDialog.csproj" />
+    <ProjectReference Include="..\HXUserState\HXUserState.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,0 +1,342 @@
+﻿<!--
+MIT License
+
+Copyright (c) 2023 Johnathan A Drews
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+-->
+
+<hx h-publisher="Changed" />
+
+<hx h-proxy="setValue" h-method="setValue" />
+<hx h-proxy="getValue" h-method="getValue" />
+
+
+<div class="displayMode" h-handle="displayMode"><label class="displayValue" h-handle="displayValue"></label></div>
+<div class="editMode" h-handle="editMode"></div>
+
+<div h-handle="popupContainer" style="display:none;"></div>
+
+<div h-clone="menuButtonContent" class="menuButtonContent"><label h-handle="text"></label></div>
+<div h-clone="buttonContent" class="buttonContent" style="border:solid 1px;padding-left:4px;padding-right:4px;"><label h-handle="text"></label></div>
+
+<div class="dateTimeEditorPopup" h-template="dateTimeEditorPopup" style="height:100%;">
+    <div class="editRow">
+        <div class="editInput">
+            <label>Date</label>
+            <input type="datetime-local" class="datePicker" />
+        </div>
+    </div>
+    <div class="editRow">
+        <div class="editInput">
+            <label>Seconds</label>
+            <input type="number" value="0" style="width:200px;" />
+        </div>
+    </div>
+    <div class="editRow">
+        <div class="editInput">
+            <label>Time Zone</label>
+            <select class="timeZonePicker"></select>
+        </div>
+    </div>
+    <div class="editRow">
+        <div class="editInput">
+            <div class="dateTimeString">
+                <label></label>
+            </div>
+        </div>
+    </div>
+    <div class="editRow">
+        <div class="editInput">
+            <hx h-handle="submitButton" h-presenter="hxCore.control.presenter/Button" />
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+    function DateTimeEditor() {
+        this.value = null;
+        this.popup = null;
+    }
+
+    DateTimeEditor.prototype = {
+
+        start: function () {
+            var t = this;
+
+            console.log("DateTimeEditor.start - ", t, hxCore.control.presenter);
+
+            t.setValue(null);
+            //popup.append($.h.app.presentation.getTemplate("DateTimeEditor", "dateTimeEditorPopup"));
+
+            var presenters = hxCore.control.presenter;
+            t.displayValue.on("click", function () {
+                t.createPopup();
+                t.popupContainer.css("display", "block");
+            });
+        },
+
+        createPopup: function () {
+            var t = this;
+            if (t.popup != null) {
+                return t.popup;
+            }
+
+            var popup = hxCore.control.presenter.presenters.PopupWindow.create();
+
+            var closeButtonContent = t.hularion.createClone("menuButtonContent");
+            closeButtonContent.handles.text[0].innerHTML = "X";
+            closeButtonContent.view[0].title = "Close this dialog.";
+            var closeButton = hxCore.control.presenter.presenters.Button.create();
+            closeButton.proxy.setContent(closeButtonContent.view[0]);
+            closeButton.proxy.setWidth(18);
+            closeButton.proxy.setHeight(18);
+            closeButton.publisher.Clicked.subscribe(() => {
+                t.popupContainer.css("display", "none");
+            });
+            popup.proxy.addHeaderItem(closeButton.view);
+
+            popup.proxy.setSize(400, 200);
+            popup.proxy.setTitle("Enter Date/Time Value");
+
+            var dateTimeSetter = t.hularion.createTemplate("dateTimeEditorPopup");
+            var submitButtonContent = t.hularion.createClone("buttonContent");
+            submitButtonContent.handles.text.html("Submit");
+            dateTimeSetter.handles.submitButton.proxy.setContent(submitButtonContent.view);
+            dateTimeSetter.handles.submitButton.proxy.setWidth(100);
+            dateTimeSetter.handles.submitButton.proxy.setHeight(24);
+            dateTimeSetter.handles.submitButton.publisher.Clicked.subscribe(() => {
+                console.log("submit button clicked");
+            });
+            popup.proxy.setContent(dateTimeSetter.view);
+
+            t.popupContainer.append(popup.view);
+
+            t.popup = popup;
+            return popup;
+        },
+
+        getValue: function () {
+            return this.value; showDisplay
+        },
+
+        setValue: function (value) {
+            var t = this;
+            t.value = value;
+            if (value == null || value.length == 0) {
+                t.displayValue.addClass("nullValue");
+                t.displayValue.removeClass("validValue");
+                t.displayValue.html("- enter date/time -");
+            }
+            else {
+                t.displayValue.addClass("validValue");
+                t.displayValue.removeClass("nullValue");
+                t.displayValue.html(t.value);
+            }
+            t.showDisplay();
+        },
+
+        showDisplay: function () {
+            var t = this;
+            t.editMode.addClass("hide");
+            //t.popupMode.addClass("hide");
+            t.displayMode.removeClass("hide");
+        },
+
+        showInput: function () {
+            var t = this;
+            t.input.val(t.value);
+            t.displayMode.addClass("hide");
+            t.editMode.removeClass("hide");
+        },
+
+        //SetupPopup: function (p) {
+        //    var t = this;
+        //    console.log("popup location", p.data("location"));
+        //    var value = p.data("location").Instance.Value;
+        //    if (value != undefined) {
+        //        p.find(".hourPicker").val(value.Hour);
+        //        p.find(".minutePicker").val(value.Minute);
+        //        p.find(".secondPicker").val(value.Second);
+        //        p.find(".milisecondPicker").val(value.Milisecond);
+        //        p.find(".microsecondPicker").val(value.Microsecond);
+        //        p.find(".datePicker").val(value.Date);
+        //        p.find(".cyclePicker").val(value.Cycle);
+        //        p.find(".timeZonePicker").val(value.Zone);
+        //    }
+        //    else {
+        //        p.find(".hourPicker").val("12");
+        //        p.find(".minutePicker").val("0");
+        //        p.find(".secondPicker").val("0");
+        //        p.find(".milisecondPicker").val("0");
+        //        p.find(".microsecondPicker").val("0");
+        //        var date = new Date();
+        //        var dateString = "";
+        //        if (date.getMonth() < 10) {
+        //            dateString += "0";
+        //        }
+        //        dateString += date.getMonth() + "/";
+        //        if (date.getDate() < 10) {
+        //            dateString += "0";
+        //        }
+        //        dateString += date.getDate() + "/" + date.getFullYear();
+        //        p.find(".datePicker").val(dateString);
+        //    }
+        //    p.find(".datePicker").datepicker();
+        //p.find(".hourPicker").on("keydown", function (e) {
+        //    return $.D.RestrictNumberEdit(this.value, e.which, this.selectionStart, this.selectionEnd, 12);
+        //});
+        //p.find(".minutePicker").on("keydown", function (e) {
+        //    return $.D.RestrictNumberEdit(this.value, e.which, this.selectionStart, this.selectionEnd, 60);
+        //});
+        //p.find(".secondPicker").on("keydown", function (e) {
+        //    return $.D.RestrictNumberEdit(this.value, e.which, this.selectionStart, this.selectionEnd, 60);
+        //});
+        //p.find(".milisecondPicker").on("keydown", function (e) {
+        //    return $.D.RestrictNumberEdit(this.value, e.which, this.selectionStart, this.selectionEnd, 999);
+        //});
+        //p.find(".microsecondPicker").on("keydown", function (e) {
+        //    return result = $.D.RestrictNumberEdit(this.value, e.which, this.selectionStart, this.selectionEnd, 999);
+        //});
+
+        //p.find(".datePicker").on("change", function () {
+        //    DateTimeValueEditor.updateDisplay(p);
+        //    $(this).blur();
+        //});
+        //p.find(".cyclePicker").on("change", function () {
+        //    DateTimeValueEditor.updateDisplay(p);
+        //});
+        //p.find(".timeZonePicker").on("change", function () {
+        //    DateTimeValueEditor.updateDisplay(p);
+        //});
+        //p.find(".dateTimeEditContainer input").on("change", function () {updateDisplay
+        //    if (p.find(".hourPicker").val().length == 0) {
+        //        p.find(".hourPicker").val("12");
+        //    }
+        //    if (p.find(".minutePicker").val().length == 0) {
+        //        p.find(".minutePicker").val("0");
+        //    }
+        //    if (p.find(".secondPicker").val().length == 0) {
+        //        p.find(".secondPicker").val("0");
+        //    }
+        //    if (p.find(".milisecondPicker").val().length == 0) {
+        //        p.find(".milisecondPicker").val("0");
+        //    }
+        //    if (p.find(".microsecondPicker").val().length == 0) {
+        //        p.find(".microsecondPicker").val("0");
+        //    }
+        //    DateTimeValueEditor.updateDisplay(p);
+        //});
+        //DateTimeValueEditor.updateDisplay(p);
+        //},
+
+        updateDisplay: function (p) {
+            var fraction = 1000 * parseInt(p.find(".milisecondPicker").val()) + parseInt(p.find(".microsecondPicker").val());
+            var fractionString = "";
+            if (fraction > 0) {
+                fractionString = fraction.toString();
+                while (fractionString.length < 6) {
+                    fractionString = "0" + fractionString;
+                }
+                fractionString = "." + fractionString;
+                while (fractionString.substr(fractionString.length - 1, 1) == "0") {
+                    fractionString = fractionString.substr(0, fractionString.length - 1);
+                }
+            }
+            var hourString = p.find(".hourPicker").val();
+            if (hourString.length < 2) {
+                hourString = "0" + hourString;
+            }
+            var minuteString = p.find(".minutePicker").val();
+            if (minuteString.length < 2) {
+                minuteString = "0" + minuteString;
+            }
+            var secondString = p.find(".secondPicker").val();
+            if (secondString.length < 2) {
+                secondString = "0" + secondString;
+            }
+            var dateString = hourString
+                + ":" + minuteString
+                + ":" + secondString
+                + fractionString
+                + " " + p.find(".cyclePicker").val()
+                + ", " + p.find(".datePicker").val()
+                + " - " + p.find(".timeZonePicker").val();
+            p.find(".dateTimeString label").html(dateString);
+            var parent = p.data("parent");
+            var maxLength = 70;
+            if (dateString.length > maxLength) {
+                dateString = dateString.substr(0, maxLength);
+            }
+            parent.data("display", dateString);
+        }
+    }
+
+</script>
+
+
+<style>
+
+    .dateTimeEditorPopup {
+        padding: 5px;
+    }
+
+    .editRow {
+        width: 100%;
+        margin-top: 5px;
+    }
+
+    .editInput > label {
+        margin-right: 5px;
+        min-width: 200px;
+    }
+
+    .dateTimeDisplayValue {
+        cursor: pointer;
+        color: #0d5482;
+    }
+
+    .displayValue {
+        cursor: pointer;
+    }
+
+    .nullValue {
+        color: #ff0000;
+    }
+
+    .validValue {
+        color: #a76203;
+    }
+</style>
+
+<style h-style-category-key="Theme" h-style-category-value="Light">
+    .this {
+        background-color: white;
+        color: black;
+    }
+
+    .dateTimeEditorPopup {
+        background-color: white;
+        color: black;
+    }
+</style>
+
+<style h-style-category-key="Theme" h-style-category-value="Dark">
+
+    .this {
+        background-color: black;
+        color: white;
+    }
+
+    .dateTimeEditorPopup {
+        background-color: black;
+        color: white;
+    }
+</style>

@@ -1,0 +1,132 @@
+﻿<!--
+MIT License
+
+Copyright (c) 2023 Johnathan A Drews
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+-->
+
+<hx h-proxy="getContent" />
+<hx h-proxy="setContent" />
+<hx h-proxy="show" />
+<hx h-proxy="hide" />
+<hx h-proxy="isFullscreen" />
+<hx h-proxy="showFullscreen" />
+<hx h-proxy="showInTab" />
+
+<div class="tabBodyBuffer" h-handle="tabBuffer"></div>
+
+<script>
+
+    function TabBody() {
+        this.isFullscreenMode = false;
+    }
+
+    TabBody.prototype = {
+
+        start: function (parameters) {
+            var t = this;
+
+            //console.log("TabBody.start - ", parameters, t);
+
+        },
+
+        getContent: function () {
+            return this.tabBuffer.find(" > *");
+        },
+
+        setContent: function (view) {
+            var t = this;
+            //console.log("TabBody.setContent - ", view, t);
+            t.tabBuffer.empty();
+            t.tabBuffer.append(view);
+        },
+
+        show: function () {
+            this.hularion.principal.css("display", "");
+        },
+
+        hide: function () {
+            this.hularion.principal.css("display", "none");
+        },
+
+        isFullscreen: function () {
+            return this.isFullscreenMode;
+        },
+
+        showFullscreen: function () {
+            var t = this;
+            t.isFullscreenMode = true;
+            t.hularion.principal.css("position", "absolute");
+            t.hularion.principal.css("left", "0");
+            t.hularion.principal.css("top", "0");
+            t.hularion.principal.css("width", "100%");
+            t.hularion.principal.css("height", "100%");
+        },
+
+        showInTab: function () {
+            var t = this;
+            t.isFullscreenMode = false;
+            t.hularion.principal.css("position", "");
+            t.hularion.principal.css("left", "");
+            t.hularion.principal.css("top", "");
+            t.hularion.principal.css("width", "");
+            t.hularion.principal.css("height", "");
+        }
+    }
+
+</script>
+<style>
+
+    .this {
+        display: inline-block;
+        margin: 0;
+        padding: 0;
+        display: inline-block;
+        overflow: hidden;
+    }
+
+        .this > * {
+            float: left;
+        }
+
+        .this * {
+        }
+
+        .this:hover {
+        }
+
+        .this *:hover {
+        }
+
+    .tabBodyBuffer {
+        margin:0;
+        padding:0;
+        width:100%;
+    }
+
+</style>
+
+<style h-style-category-key="Theme" h-style-category-value="Light">
+    .this{
+        background-color:white;
+    }
+    .textContent {
+        border-color: lightgray;
+    }
+</style>
+
+<style h-style-category-key="Theme" h-style-category-value="Dark">
+    .this {
+        background-color: black;
+    }
+    .textContent {
+        border-color: lightgray;
+    }
+</style>
+

@@ -1,0 +1,570 @@
+﻿<!--
+MIT License
+
+Copyright (c) 2023 Johnathan A Drews
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+-->
+
+<hx h-publisher="DirectoryOpened" />
+<hx h-publisher="DirectoryAccessDenied" />
+<hx h-publisher="FileSelected" />
+
+<hx h-proxy="setWidth" />
+<hx h-proxy="setHeight" />
+<hx h-proxy="setSize" />
+<hx h-proxy="getDirectory" />
+
+<div class="sidebar">
+    <div>
+        <div class="drivesHeader">
+            <hx h-presenter="fCoreControl/Button" h-handle="bookmarks" />
+        </div>
+        <ul class="drivesList" h-handle="drivesList"></ul>
+    </div>
+    <div class="driveInfo" h-handle="driveInfo">
+        <div class="driveInfoItemHeader"><label>Format</label></div>
+        <div class="driveInfoItemInfo"><label h-handle="drive.format"></label></div>
+        <div class="driveInfoItemHeader"><label>Type</label></div>
+        <div class="driveInfoItemInfo"><label h-handle="drive.type"></label></div>
+        <div class="driveInfoItemHeader"><label>Size</label></div>
+        <div class="driveInfoItemInfo"><label h-handle="drive.size"></label></div>
+        <div class="driveInfoItemHeader"><label>Free Space</label></div>
+        <div class="driveInfoItemInfo"><label h-handle="drive.freeSpace"></label></div>
+    </div>
+</div>
+
+<li h-clone="driveItem">
+    <div class="driveHeader"><label h-handle="header"></label></div>
+</li>
+
+<div class="directorySearch " h-handle="directorySearch">
+    <div class="searchBar">
+        <div class="navPath" h-presenter="fCoreControl/ViewNavigationPath" h-handle="nav.path" h-subscribe="SegmentPreviewed=>navPreview;SegmentSelected=>navSelected"></div>
+    </div>
+    <div class="listingTableContainer" h-handle="listingTableContainer">
+        <div h-presenter="fCoreControl/HeaderTable" h-handle="listingTable" />
+    </div>
+</div>
+
+
+<label h-clone="navSeparator" style="margin: 0px 4px 0px 4px"></label>
+
+<label h-clone="labelclone">default</label>
+<div h-clone="directoryItem" h-handle="container" class="directoryItem cellItem">
+    <label h-handle="name"></label>
+</div>
+<div h-clone="fileItem" h-handle="container" class="fileItem cellItem">
+    <label h-handle="name"></label>
+</div>
+
+<div h-clone="rowHeader" class="rowHeader"><label h-handle="label"></label></div>
+<div h-clone="fileHeader" class="fileHeader"></div>
+<div h-clone="fileDefaultCell" class="fileDefaultCell cellItem"></div>
+<div h-clone="buttonContent" class="buttonContent"><label h-handle="text"></label></div>
+
+<script>
+
+    function FileSearch() {
+        this.navigation = null;
+        this.delimiter = "";
+        this.itemNameIndex = -1;
+        this.itemCreatedIndex = -1;
+        this.itemSizeIndex = -1;
+        this.drivesListArray = [];
+        this.ten = 10;
+        this.thousand = 1000;
+        this.million = this.thousand * this.thousand;
+        this.billion = this.million * this.thousand;
+        this.trillion = this.billion * this.thousand;
+    }
+
+    FileSearch.prototype = {
+
+        start: function (parameters) {
+            var t = this;
+            console.log("FileSearch.start  - ", t);
+
+            //var bookmarkContent = t.hularion.createClone("buttonContent");
+            //bookmarkContent.handles.text[0].innerHTML = "B";
+            //bookmarkContent.view[0].title = "Open Bookmarked Directories";
+            //t.bookmarks.proxy.setContent(bookmarkContent.view);
+            //t.bookmarks.proxy.setWidth(22);
+            //t.bookmarks.proxy.setHeight(22);
+
+            //t.setHeight(t.hularion.principal.height());
+
+            var promises = [];
+            var start = {};
+
+            promises.push(communicator.file.getDrives().then(response => {
+                //console.log("FileSearch.start request drives - ", response);
+                start.drives = response.detail.drives;
+            }));
+            promises.push(communicator.file.getDelimiter().then(response => {
+                //console.log("FileSearch.start request  hularion/host/disk/delimiter - ", response);
+                t.delimiter = response.detail.delimiter;
+            }));
+
+            t.setupTable();
+
+            Promise.all(promises).then(() => {
+                var separator = t.hularion.createClone("navSeparator");
+                separator.view.html(t.delimiter);
+                t.nav.path.proxy.setSeparator(separator.view[0]);
+
+                algorithm.control.processArray(start.drives, drive => {
+                    var driveObject = t.hularion.createClone("driveItem");
+                    driveObject.handles.header.html(drive.name);
+                    t.drivesList.append(driveObject.view);
+                    t.drivesListArray.push(driveObject)
+                    driveObject.view.on("click", () => {
+                        algorithm.control.processArray(t.drivesListArray, driveItem => {
+                            driveItem.view.removeClass("driverHeaderSelected");
+                        });
+                        driveObject.view.addClass("driverHeaderSelected");
+                        t.nav.path.proxy.clearAtIndex(0);
+                        t.setDirectoryContent([drive.name], drive.name);
+                        t.setDriveInfo(drive);
+                    });
+                });
+
+                if (start.drives.length > 0) {
+                    t.setDirectoryContent([start.drives[0].name], start.drives[0].name);
+                    t.drivesListArray[0].view.addClass("driverHeaderSelected");
+                    t.setDriveInfo(start.drives[0]);
+                }
+            });
+        },
+
+        setDriveInfo: function (drive) {
+            var t = this;
+            t.drive.format[0].innerHTML = drive.format;
+            t.drive.type[0].innerHTML = drive.type;
+            t.drive.size[0].innerHTML = t.bytesToString(drive.size);
+            t.drive.freeSpace[0].innerHTML = t.bytesToString(drive.freeSpace);
+        },
+
+        bytesToString: function (bytes) {
+            var t = this;
+            var result = "0";
+            if (bytes < t.thousand) { result = bytes + " b"; }
+            if (bytes > t.thousand && bytes < t.million) { result = (Math.round(bytes / t.thousand * t.ten) / t.ten) + " kb"; }
+            if (bytes > t.million && bytes < t.billion) { result = (Math.round(bytes / t.million * t.ten) / t.ten) + " mb"; }
+            if (bytes > t.billion && bytes < t.trillion) { result = (Math.round(bytes / t.billion * t.ten) / t.ten) + " gb"; }
+            if (bytes > t.trillion) { result = (Math.round(bytes / t.trillion * t.ten) / t.ten) + " tb"; }
+            return result;
+        },
+
+        setDirectoryContent: function (path, newDirectory) {
+            var t = this;
+            var pathString = path.join(t.delimiter) + t.delimiter;
+            communicator.file.readDirectory({ directory: pathString }).then(response => {
+                if (response.state == "Failure") {
+                    console.warn("FileSearch.setDirectoryContent Failure - ", response);
+                    path.pop();
+                    var publishMessage = { path: pathString };
+                    if (response.messages != null && response.messages.length > 0) {
+                        publishMessage.header = response.messages[0].header;
+                        publishMessage.message = response.messages[0].message;
+                    }
+                    t.hularion.publisher.DirectoryAccessDenied.publish(publishMessage);
+                    return;
+                }
+                t.hularion.publisher.DirectoryOpened.publish({ path: pathString });
+                t.listingTable.proxy.clearAllRows();
+                if (newDirectory != null) {
+                    t.nav.path.proxy.addPath(newDirectory);
+                }
+                var pathLabel = t.hularion.createClone("labelclone");
+                pathLabel.view[0].innerHTML = path;
+
+                algorithm.control.processArray(response.detail.directories, directory => {
+                    var rowIndex = t.listingTable.proxy.appendRow();
+                    var rowHeader = t.hularion.createClone("rowHeader");
+                    rowHeader.handles.label[0].innerHTML = (rowIndex + 1);
+                    t.listingTable.proxy.setRowHeader(rowIndex, rowHeader.view[0]);
+                    var item = t.hularion.createClone("directoryItem");
+                    item.handles.name[0].innerHTML = directory.name + response.detail.directoryDelimiter;
+                    item.handles.name[0].title = item.handles.name[0].innerHTML;
+                    item.view.on("click", () => {
+                        path.push(directory.name);
+                        t.nav.path.proxy.clearAtIndex(path.length - 1);
+                        t.setDirectoryContent(path, directory.name);
+                    });
+                    t.listingTable.proxy.setContent(t.itemNameIndex, rowIndex, item.view);
+                    item = t.hularion.createClone("fileDefaultCell");
+                    item.view[0].innerHTML = directory.creationDate;
+                    t.listingTable.proxy.setContent(t.itemCreatedIndex, rowIndex, item.view);
+                    item = t.hularion.createClone("fileDefaultCell");
+                    item.view[0].innerHTML = "";
+                    t.listingTable.proxy.setContent(t.itemSizeIndex, rowIndex, item.view);
+                });
+
+                algorithm.control.processArray(response.detail.files, file => {
+                    var rowIndex = t.listingTable.proxy.appendRow();
+                    var rowHeader = t.hularion.createClone("rowHeader");
+                    rowHeader.handles.label[0].innerHTML = (rowIndex + 1);
+                    t.listingTable.proxy.setRowHeader(rowIndex, rowHeader.view[0]);
+                    var item = t.hularion.createClone("fileItem");
+                    if (file.extension == null) {
+                        item.handles.name[0].innerHTML = file.name;
+                    }
+                    else {
+                        item.handles.name[0].innerHTML = file.name + response.detail.extensionDelimiter + file.extension;
+                    }
+                    item.handles.name[0].title = item.handles.name[0].innerHTML;
+                    item.view.on("click", () => {
+                        var message = { path: pathString };
+                        message.filename = file.name + response.detail.extensionDelimiter + file.extension;
+                        message.fullPath = message.path + message.filename;
+                        t.hularion.publisher.FileSelected.publish(message);
+                    });
+                    t.listingTable.proxy.setContent(t.itemNameIndex, rowIndex, item.view);
+                    item = t.hularion.createClone("fileDefaultCell");
+                    item.view[0].innerHTML = file.creationDate;
+                    t.listingTable.proxy.setContent(t.itemCreatedIndex, rowIndex, item.view);
+                    item = t.hularion.createClone("fileDefaultCell");
+                    item.view.addClass("fileSize");
+                    item.view[0].innerHTML = t.bytesToString(file.size);
+                    t.listingTable.proxy.setContent(t.itemSizeIndex, rowIndex, item.view);
+                });
+
+            });
+        },
+
+        createDirectory: function (options) {
+
+
+        },
+
+        createFile: function (file) {
+
+
+        },
+
+        navPreview: function (object, index) {
+            var t = this;
+            var path = t.nav.path.proxy.getSegmentRange(0, index);
+            t.setDirectoryContent(path);
+        },
+
+        navSelected: function () {
+        },
+
+        setupTable: function () {
+            var t = this;
+
+            t.itemNameIndex = t.listingTable.proxy.appendColumn();
+            var header = t.hularion.createClone("fileHeader");
+            header.view[0].innerHTML = "Name";
+            t.listingTable.proxy.setColumnHeader(t.itemNameIndex, header.view);
+            t.listingTable.proxy.setColumnWidth(t.itemNameIndex, 200);
+
+            t.itemCreatedIndex = t.listingTable.proxy.appendColumn();
+            header = t.hularion.createClone("fileHeader");
+            header.view[0].innerHTML = "Created";
+            t.listingTable.proxy.setColumnHeader(t.itemCreatedIndex, header.view);
+            t.listingTable.proxy.setColumnWidth(t.itemCreatedIndex, 100);
+
+            t.itemSizeIndex = t.listingTable.proxy.appendColumn();
+            header = t.hularion.createClone("fileHeader");
+            header.view[0].innerHTML = "Size";
+            t.listingTable.proxy.setColumnHeader(t.itemSizeIndex, header.view);
+            t.listingTable.proxy.setColumnWidth(t.itemSizeIndex, 100);
+
+            t.listingTable.proxy.setBaseRowHeight(20);
+        },
+
+        setWidth: function (width) {
+            var t = this;
+            if (width > 110) {
+                width = width - 110;
+            }
+            t.listingTable.proxy.setWidth(width);
+        },
+
+        setHeight: function (height) {
+            var t = this;
+            t.hularion.principal.height(height);
+            t.directorySearch.height(height - 2);
+            t.listingTable.proxy.setHeight(height - 95);
+            t.listingTableContainer.height(height - 45);
+        },
+
+        setSize: function (width, height) {
+            var t = this;
+            t.setWidth(width);
+            t.setHeight(height);
+        },
+
+        getDirectory: function () {
+            var t = this;
+            return t.nav.path.proxy.getPath(t.delimiter);
+        }
+
+
+    }
+
+</script>
+<style>
+
+    .this {
+        user-select: none;
+        display: inline-block;
+        width: 100%;
+        height: 300px;
+    }
+
+        .this > * {
+            float: left;
+        }
+
+        .this * {
+            user-select: none;
+        }
+
+    .sidebar {
+        height: calc(100% - 10px);
+        width: 100px;
+    }
+
+    .searchBar {
+        display: inline-block;
+        width: 100%;
+        height: 36px;
+        overflow: hidden;
+        margin-top: 2px;
+    }
+
+        .searchBar > * {
+            float: left;
+            margin-right: 10px;
+        }
+
+    .drivesHeader {
+        text-align: center;
+        height: 34px;
+    }
+
+    .drivesList {
+        margin: 0;
+        padding: 0;
+        list-style-type: none;
+        padding-top: 8px;
+    }
+
+    .driveHeader {
+        padding-left: 10px;
+        cursor: pointer;
+    }
+
+        .driveHeader * {
+            cursor: pointer;
+        }
+
+    .directorySearch {
+        width: calc(100% - 107px);
+        margin-left: 5px;
+    }
+
+    .listingTableContainer {
+        overflow: hidden;
+        height: 360px;
+    }
+
+        .listingTableContainer > * {
+        }
+
+    .directoryItem * {
+        cursor: pointer;
+    }
+
+    .directoryItem {
+        cursor: pointer;
+    }
+
+        .directoryItem:hover {
+        }
+
+    .fileItem {
+    }
+
+        .fileItem:hover {
+        }
+
+    .driveInfo {
+        margin-top: 10px;
+    }
+
+        .driveInfo > * {
+            padding-left: 10px;
+            height: 20px;
+        }
+
+    .driveInfoItemHeader {
+        margin-top: 4px;
+    }
+
+    .driveInfoItemInfo {
+        border-bottom-style: solid;
+        border-bottom-width: 0px;
+        margin-bottom: 4px;
+    }
+
+    .fileHeader {
+        padding-left: 4px;
+    }
+
+    .fileSize {
+        text-align: right;
+    }
+
+    .cellItem {
+        padding-left: 2px;
+    }
+
+    .buttonContent {
+        border-style: solid;
+        border-width: 1px;
+        width: 24px;
+        height: 24px;
+        text-align: center;
+        padding: 0;
+        margin: 0;
+        overflow: hidden;
+        padding-top: 4px;
+    }
+
+        .buttonContent * {
+            padding: 0;
+            margin: 0;
+            height: 18px;
+        }
+
+    .rowHeader {
+        text-align: right;
+        margin-right: 4px;
+    }
+</style>
+
+
+
+<style h-style-category-key="Theme" h-style-category-value="Light">
+    .this {
+        background: linear-gradient(135deg, rgb(200,200,200) 0%, white 80%, rgb(200,200,200) 100%);
+    }
+
+    .driverHeaderSelected {
+        background: linear-gradient(135deg, rgb(200,200,200) 0%, white 60%, rgb(100,100,100) 80%, white 100%);
+    }
+
+    .driveHeader:hover {
+        background-color: rgb(196, 228, 252);
+    }
+
+    .driveInfoItemHeader {
+        background: linear-gradient(135deg, rgb(200,200,200) 0%, white 60%, white 100%);
+    }
+
+    .driveInfoItemInfo {
+        border-bottom-color: rgb(50,50,50);
+    }
+
+
+    .driveInfo {
+        border-color: white;
+    }
+
+    .buttonContent {
+        border-color: rgb(191, 191, 191);
+    }
+
+        .buttonContent:hover {
+            background: linear-gradient(0deg, white 0%, black 12%, white 22%, white 22%, white 100%);
+        }
+
+    .fileHeader {
+        background: linear-gradient(135deg, rgb(200,200,200) 0%, white 60%, white 100%);
+    }
+
+
+    .directoryItem {
+        color: rgb(10, 29, 74);
+    }
+
+        .directoryItem:hover {
+            background-color: rgb(196, 228, 252);
+        }
+
+    .fileItem {
+        color: rgb(99, 107, 3);
+    }
+
+        .fileItem:hover {
+            background-color: rgb(196, 228, 252);
+        }
+</style>
+
+<style h-style-category-key="Theme" h-style-category-value="Dark">
+
+    .this {
+        background-color: black;
+    }
+
+    .driverHeaderSelected {
+        background: linear-gradient(135deg, rgb(100,100,100) 0%, black 80%, black 100%);
+    }
+
+    .driveHeader:hover {
+        background-color: rgb(10, 29, 74);
+    }
+
+    .driveInfoItemHeader {
+        background: linear-gradient(135deg, rgb(100,100,100) 0%, black 60%, black 100%);
+    }
+
+    .driveInfoItemInfo {
+        border-bottom-color: rgb(50,50,50);
+    }
+
+
+    .driveInfo {
+        border-color: white;
+    }
+
+    .buttonContent {
+        border-color: rgb(191, 191, 191);
+    }
+
+        .buttonContent:hover {
+            background: linear-gradient(0deg, black 0%, white 12%, black 22%, black 22%, black 100%);
+        }
+
+    .fileHeader {
+        background: linear-gradient(135deg, rgb(100,100,100) 0%, black 80%, black 100%);
+    }
+
+
+    .directoryItem {
+        color: rgb(187, 236, 252);
+    }
+
+        .directoryItem:hover {
+            background-color: rgb(10, 29, 74);
+        }
+
+    .fileItem {
+        color: rgb(218, 235, 175);
+    }
+
+        .fileItem:hover {
+            background-color: rgb(10, 29, 74);
+        }
+</style>
+

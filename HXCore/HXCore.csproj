@@ -1,0 +1,98 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="HularionExperience\**" />
+    <Compile Remove="HXFileDialog\**" />
+    <EmbeddedResource Remove="HularionExperience\**" />
+    <EmbeddedResource Remove="HXFileDialog\**" />
+    <None Remove="HularionExperience\**" />
+    <None Remove="HXFileDialog\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="HXCoreControl\Configuration\Control.html" />
+    <None Remove="HXCoreControl\HXCoreControl.hxproject" />
+    <None Remove="HXCoreControl\PresenterSets\Control\Button.html" />
+    <None Remove="HXCoreControl\PresenterSets\Control\DraggablePane.html" />
+    <None Remove="HXCoreControl\PresenterSets\Control\Form.html" />
+    <None Remove="HXCoreControl\PresenterSets\Control\FullscreenMenu.html" />
+    <None Remove="HXCoreControl\PresenterSets\Control\HeaderTable.html" />
+    <None Remove="HXCoreControl\PresenterSets\Control\Menu.html" />
+    <None Remove="HXCoreControl\PresenterSets\Control\MenuItem.html" />
+    <None Remove="HXCoreControl\PresenterSets\Control\Menus\ContextMenu.html" />
+    <None Remove="HXCoreControl\PresenterSets\Control\Menus\FullscreenMenu.html" />
+    <None Remove="HXCoreControl\PresenterSets\Control\Pane\ViewPane.html" />
+    <None Remove="HXCoreControl\PresenterSets\Control\Pane\WindowPane.html" />
+    <None Remove="HXCoreControl\PresenterSets\Control\PopupWindow.html" />
+    <None Remove="HXCoreControl\PresenterSets\Control\SizeablePane.html" />
+    <None Remove="HXCoreControl\PresenterSets\Control\Table.html" />
+    <None Remove="HXCoreControl\PresenterSets\Control\Tabs\TabBody.html" />
+    <None Remove="HXCoreControl\PresenterSets\Control\Tabs\TabHeader.html" />
+    <None Remove="HXCoreControl\PresenterSets\Control\Tabs\TabHeaderBar.html" />
+    <None Remove="HXCoreControl\PresenterSets\Control\Tabs\TabSystem.html" />
+    <None Remove="HXCoreControl\PresenterSets\Control\TextBox.html" />
+    <None Remove="HXCoreControl\PresenterSets\Control\ViewContainer.html" />
+    <None Remove="HXCoreControl\PresenterSets\Control\ViewNavigationArray.html" />
+    <None Remove="HXCoreControl\PresenterSets\Control\ViewNavigationPath.html" />
+    <None Remove="HXCoreControl\ScriptSets\Control\ViewNavigationStack.js" />
+    <None Remove="HXCoreTools\Configuration\Algorithm.html" />
+    <None Remove="HXCoreTools\Configuration\UITools.html" />
+    <None Remove="HXCoreTools\HXCoreTools.hxproject" />
+    <None Remove="HXCoreTools\ScriptSets\Algorithm\API.js" />
+    <None Remove="HXCoreTools\ScriptSets\Algorithm\Control.js" />
+    <None Remove="HXCoreTools\ScriptSets\Algorithm\Set.js" />
+    <None Remove="HXCoreTools\ScriptSets\Algorithm\TreeTraverser.js" />
+    <None Remove="HXScriptImports\Configuration\Import.html" />
+    <None Remove="HXScriptImports\HXScriptImports.hxproject" />
+    <None Remove="HXScriptImports\ScriptSets\Import\jquery_min.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="HXCoreControl\Configuration\Control.html" />
+    <EmbeddedResource Include="HXCoreControl\HXCoreControl.hxproject" />
+    <EmbeddedResource Include="HXCoreControl\PresenterSets\Control\List\VerticalList.html" />
+    <EmbeddedResource Include="HXCoreControl\PresenterSets\Control\Menus\ContextMenu.html" />
+    <EmbeddedResource Include="HXCoreControl\PresenterSets\Control\Menus\FullscreenMenu.html" />
+    <EmbeddedResource Include="HXCoreControl\PresenterSets\Control\Pane\WindowPane.html" />
+    <EmbeddedResource Include="HXCoreControl\PresenterSets\Control\Pane\ViewPane.html" />
+    <EmbeddedResource Include="HXCoreControl\PresenterSets\Control\Tabs\TabBody.html" />
+    <EmbeddedResource Include="HXCoreControl\PresenterSets\Control\Tabs\TabHeader.html" />
+    <EmbeddedResource Include="HXCoreControl\PresenterSets\Control\Tabs\TabHeaderBar.html" />
+    <EmbeddedResource Include="HXCoreControl\PresenterSets\Control\Tabs\TabSystem.html" />
+    <EmbeddedResource Include="HXCoreControl\PresenterSets\Control\TextBox.html" />
+    <EmbeddedResource Include="HXCoreControl\PresenterSets\Control\Form.html" />
+    <EmbeddedResource Include="HXCoreControl\PresenterSets\Control\HeaderTable.html" />
+    <EmbeddedResource Include="HXCoreControl\PresenterSets\Control\Button.html" />
+    <EmbeddedResource Include="HXCoreControl\PresenterSets\Control\Pane\DraggablePane.html" />
+    <EmbeddedResource Include="HXCoreControl\PresenterSets\Control\Pane\SizeablePane.html" />
+    <EmbeddedResource Include="HXCoreControl\PresenterSets\Control\Table.html" />
+    <EmbeddedResource Include="HXCoreControl\PresenterSets\Control\Menus\Menu.html" />
+    <EmbeddedResource Include="HXCoreControl\PresenterSets\Control\Menus\MenuItem.html" />
+    <EmbeddedResource Include="HXCoreControl\PresenterSets\Control\PopupWindow.html" />
+    <EmbeddedResource Include="HXCoreControl\PresenterSets\Control\ViewContainer.html" />
+    <EmbeddedResource Include="HXCoreControl\PresenterSets\Control\Navigation\ViewNavigationArray.html" />
+    <EmbeddedResource Include="HXCoreControl\PresenterSets\Control\Navigation\ViewNavigationPath.html" />
+    <EmbeddedResource Include="HXCoreControl\ScriptSets\Control\ViewNavigationStack.js" />
+    <EmbeddedResource Include="HXCoreTools\Configuration\Algorithm.html" />
+    <EmbeddedResource Include="HXCoreTools\Configuration\UITools.html" />
+    <EmbeddedResource Include="HXCoreTools\HXCoreTools.hxproject" />
+    <EmbeddedResource Include="HXCoreTools\ScriptSets\Algorithm\API.js" />
+    <EmbeddedResource Include="HXCoreTools\ScriptSets\Algorithm\Control.js" />
+    <EmbeddedResource Include="HXCoreTools\ScriptSets\Algorithm\Set.js" />
+    <EmbeddedResource Include="HXCoreTools\ScriptSets\Algorithm\TreeTraverser.js" />
+    <EmbeddedResource Include="HXScriptImports\Configuration\Import.html" />
+    <EmbeddedResource Include="HXScriptImports\HXScriptImports.hxproject" />
+    <EmbeddedResource Include="HXScriptImports\ScriptSets\Import\jquery_min.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="HXCoreTools\ScriptSets\UITools\" />
+  </ItemGroup>
+
+</Project>

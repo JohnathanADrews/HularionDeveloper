@@ -1,0 +1,351 @@
+﻿<!--
+MIT License
+
+Copyright (c) 2023 Johnathan A Drews
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+-->
+
+
+<hx h-publisher="SizeChanged" />
+<hx h-publisher="PositionChanged" />
+
+<hx h-proxy="getSizeBuffer" />
+<hx h-proxy="setSizeBuffer" />
+<hx h-proxy="setContent" />
+<hx h-proxy="setSize" />
+<hx h-proxy="move" />
+<hx h-proxy="centerOnWindow" />
+
+<div class="sizing" h-handle="sizing">
+    <div class="topLeftSizer" h-handle="topLeftSizer" style="cursor:nwse-resize;"></div>
+    <div class="topSizer" h-handle="topSizer" style="cursor:ns-resize;"></div>
+    <div class="topRightSizer" h-handle="topRightSizer" style="cursor:nesw-resize;"></div>
+    <div class="middleLeftSizer" h-handle="middleLeftSizer" style="cursor:ew-resize;"></div>
+    <div class="middleSizer" h-handle="middleSizer" style="cursor:nesw-resize;"></div>
+    <div class="middleRightSizer" h-handle="middleRightSizer" style="cursor:ew-resize;"></div>
+    <div class="bottomLeftSizer" h-handle="bottomLeftSizer" style="cursor:nesw-resize; "></div>
+    <div class="bottomSizer" h-handle="bottomSizer" style="cursor:ns-resize;"></div>
+    <div class="bottomRightSizer" h-handle="bottomRightSizer" style="cursor:nwse-resize;"></div>
+</div>
+
+<div class="sizeablePaneContent" h-handle="content">
+</div>
+
+
+<script>
+
+    function SizeablePane() {
+        this.headerSelected = false;
+        this.sizeBuffer = 5;
+    }
+
+    SizeablePane.prototype = {
+
+        start: function () {
+            var t = this;
+            //console.log("SizeablePane.start - ", t);
+
+            var getDx = (moveX, isFromLeft) => {
+                var dx = moveX;
+                if (moveX > 0 && isFromLeft === true) {
+                    var width = t.hularion.principal.width();
+                    if (width - dx < 2 * t.sizeBuffer) {
+                        dx = 2 * t.sizeBuffer - width;
+                        if (dx < 0) { dx = 0; }
+                    }
+                }
+                if (moveX < 0 && isFromLeft === false) {
+                    var width = t.hularion.principal.width();
+                    if (width + dx < 2 * t.sizeBuffer) {
+                        dx = -1 * (2 * t.sizeBuffer - width);
+                        if (dx < 0) { dx = 0; }
+                    }
+                }
+                return dx;
+            };
+            var getDy = (moveY, isFromTop) => {
+                var dy = moveY;
+                if (moveY > 0 && isFromTop === true) {
+                    if (t.hularion.principal.height() - dy < 2 * t.sizeBuffer) {
+                        dy = 2 * t.sizeBuffer - t.hularion.principal.height();
+                        if (dy < 0) { dy = 0; }
+                    }
+                }
+                if (moveY < 0 && isFromTop === false) {
+                    if (t.hularion.principal.height() + dy < 2 * t.sizeBuffer) {
+                        dy = -1 * (2 * t.sizeBuffer - t.hularion.principal.height());
+                        if (dy < 0) { dy = 0; }
+                    }
+                }
+                return dy;
+            };
+
+
+            var isTop = false;
+            var heightSizer = (e) => {
+                var dy = getDy(e.movementY, isTop);
+                if (isTop === true) {
+                    if (dy != 0) {
+                        var rect = t.hularion.principal[0].getBoundingClientRect();
+                        t.setPosition(rect.x, rect.y + dy);
+                    }
+                    t.setHeight(t.hularion.principal.height() - dy, true);
+                }
+                else {
+                    t.setHeight(t.hularion.principal.height() + dy, true);
+                }
+            };
+            var releaseheightSizer = (e) => {
+                t.hularion.window.removeEventListener("mouseup", releaseheightSizer);
+                t.hularion.window.removeEventListener("mousemove", heightSizer);
+            };
+            t.topSizer[0].addEventListener("mousedown", e => {
+                t.hularion.window.addEventListener("mousemove", heightSizer);
+                t.hularion.window.addEventListener("mouseup", releaseheightSizer);
+                isTop = true;
+            });
+            t.bottomSizer[0].addEventListener("mousedown", e => {
+                t.hularion.window.addEventListener("mousemove", heightSizer);
+                t.hularion.window.addEventListener("mouseup", releaseheightSizer);
+                isTop = false;
+            });
+
+            var isLeft = false;
+            var widthSizer = (e) => {
+                var dx = getDx(e.movementX, isLeft);
+                if (isLeft === true) {
+                    if (dx != 0) {
+                        var rect = t.hularion.principal[0].getBoundingClientRect();
+                        t.setPosition(rect.x + dx, rect.y);
+                    }
+                    t.setWidth(t.hularion.principal.width() - dx, true);
+                }
+                else {
+                    t.setWidth(t.hularion.principal.width() + dx, true);
+                }
+            };
+            var releaseRightSizer = (e) => {
+                t.hularion.window.removeEventListener("mouseup", releaseRightSizer);
+                t.hularion.window.removeEventListener("mousemove", widthSizer);
+            };
+            t.middleLeftSizer[0].addEventListener("mousedown", e => {
+                t.hularion.window.addEventListener("mousemove", widthSizer);
+                t.hularion.window.addEventListener("mouseup", releaseRightSizer);
+                isLeft = true;
+            });
+            t.middleRightSizer[0].addEventListener("mousedown", e => {
+                t.hularion.window.addEventListener("mousemove", widthSizer);
+                t.hularion.window.addEventListener("mouseup", releaseRightSizer);
+                isLeft = false;
+            });
+
+            var nwseSizer = (e) => {
+                var dx = getDx(e.movementX, isLeft);
+                var dy = getDy(e.movementY, isLeft);
+                if (isLeft === true) {
+                    if (dx != 0 || dy != 0) {
+                        var rect = t.hularion.principal[0].getBoundingClientRect();
+                        t.setPosition(rect.x + dx, rect.y + dy);
+                    }
+                    t.setSize(t.hularion.principal.width() - dx, t.hularion.principal.height() - dy);
+                }
+                else {
+                    t.setSize(t.hularion.principal.width() + dx, t.hularion.principal.height() + dy);
+                }
+            };
+            var releaseNWSESizer = (e) => {
+                t.hularion.window.removeEventListener("mouseup", releaseNWSESizer);
+                t.hularion.window.removeEventListener("mousemove", nwseSizer);
+            };
+            t.topLeftSizer[0].addEventListener("mousedown", e => {
+                t.hularion.window.addEventListener("mousemove", nwseSizer);
+                t.hularion.window.addEventListener("mouseup", releaseNWSESizer);
+                isLeft = true;
+            });
+            t.bottomRightSizer[0].addEventListener("mousedown", e => {
+                t.hularion.window.addEventListener("mousemove", nwseSizer);
+                t.hularion.window.addEventListener("mouseup", releaseNWSESizer);
+                isLeft = false;
+            });
+
+            var neswSizer = (e) => {
+                var dx = getDx(e.movementX, isLeft);
+                var dy = getDy(e.movementY, !isLeft);
+                if (isLeft === true) {
+                    if (dx != 0) {
+                        var rect = t.hularion.principal[0].getBoundingClientRect();
+                        t.setPosition(rect.x + dx, rect.y);
+                    }
+                    t.setSize(t.hularion.principal.width() - dx, t.hularion.principal.height() + dy);
+                }
+                else {
+                    if (dy != 0) {
+                        var rect = t.hularion.principal[0].getBoundingClientRect();
+                        t.setPosition(rect.x, rect.y + dy);
+                    }
+                    t.setSize(t.hularion.principal.width() + dx, t.hularion.principal.height() - dy);
+                }
+            };
+            var releaseNESWSizer = (e) => {
+                t.hularion.window.removeEventListener("mouseup", releaseNESWSizer);
+                t.hularion.window.removeEventListener("mousemove", neswSizer);
+            };
+            t.bottomLeftSizer[0].addEventListener("mousedown", e => {
+                t.hularion.window.addEventListener("mousemove", neswSizer);
+                t.hularion.window.addEventListener("mouseup", releaseNESWSizer);
+                isLeft = true;
+            });
+            t.topRightSizer[0].addEventListener("mousedown", e => {
+                t.hularion.window.addEventListener("mousemove", neswSizer);
+                t.hularion.window.addEventListener("mouseup", releaseNESWSizer);
+                isLeft = false;
+            });
+
+        },
+
+        getSizeBuffer: function (buffer) {
+            return this.sizeBuffer;
+        },
+
+        setSizeBuffer: function (buffer) {
+            this.sizeBuffer = buffer;
+        },
+
+        setContent: function (content) {
+            this.content.append(content);
+        },
+
+        setWidth: function (width, publish) {
+            var t = this;
+            //console.log("SizeablePane.setWidth - ", width, publish);
+            t.hularion.principal.width(width);
+            t.sizing.width(width);
+            var marginWidth = 20;
+            if (width < (2 * marginWidth)) {
+                marginWidth = width / 2;
+            }
+            var middleWidth = width - (2 * marginWidth);
+            if (middleWidth < 0) {
+                middleWidth = 0;
+            }
+            t.topLeftSizer.width(marginWidth);
+            t.topSizer.width(middleWidth);
+            t.topRightSizer.width(marginWidth);
+            t.middleLeftSizer.width(marginWidth);
+            t.middleSizer.width(middleWidth);
+            t.middleRightSizer.width(marginWidth);
+            t.bottomLeftSizer.width(marginWidth);
+            t.bottomSizer.width(middleWidth);
+            t.bottomRightSizer.width(marginWidth);
+            t.content.width(width - (2 * t.sizeBuffer));
+            t.content.css("margin-left", t.sizeBuffer + "px");
+            if (publish === true) {
+                t.publishDimensions();
+            }
+        },
+
+        setHeight: function (height, publish) {
+            var t = this;
+            //console.log("SizeablePane.setHeight - ", height, publish);
+            t.hularion.principal.height(height);
+            t.sizing.height(height);
+            var marginHeight = 20;
+            if (height < (2 * marginHeight)) {
+                marginHeight = height / 2;
+            }
+            var middleHeight = height - (2 * marginHeight);
+            if (middleHeight < 0) {
+                middleHeight = 0;
+            }
+            t.topLeftSizer.height(marginHeight);
+            t.topSizer.height(marginHeight);
+            t.topRightSizer.height(marginHeight);
+            t.middleLeftSizer.height(middleHeight);
+            t.middleSizer.height(middleHeight);
+            t.middleRightSizer.height(middleHeight);
+            t.bottomLeftSizer.height(marginHeight);
+            t.bottomSizer.height(marginHeight);
+            t.bottomRightSizer.height(marginHeight);
+            t.content.height(height - (2 * t.sizeBuffer));
+            t.content.css("margin-top", "-" + (height - t.sizeBuffer) + "px");
+            if (publish === true) {
+                t.publishDimensions();
+            }
+        },
+
+        setSize: function (width, height) {
+            var t = this;
+            t.setWidth(width, false);
+            t.setHeight(height, false);
+            t.publishDimensions();
+        },
+
+        move: function (dx, dy) {
+            var t = this;
+            var rect = t.hularion.principal[0].getBoundingClientRect();
+            t.setPosition(rect.x + dx + t.hularion.window.scrollX, rect.y + dy + t.hularion.window.scrollY);
+        },
+
+        centerOnWindow: function () {
+            var t = this;
+            t.hularion.principal.css("left", (t.hularion.window.innerWidth - t.hularion.principal.width()) / 2);
+            t.hularion.principal.css("top", (t.hularion.window.innerHeight - t.hularion.principal.height()) / 2);
+        },
+
+        publishDimensions: function () {
+            var t = this;
+            var dimensions = {
+                paneWidth: t.hularion.principal.width(),
+                paneHeight: t.hularion.principal.height(),
+                contentWidth: t.content.width(),
+                contentHeight: t.content.height()
+            };
+            t.hularion.publisher.SizeChanged.publish(dimensions);
+        },
+
+        setPosition: function (x, y) {
+            var t = this;
+            t.hularion.principal.css("left", x + "px");
+            t.hularion.principal.css("top", y + "px");
+            t.hularion.publisher.PositionChanged.publish({ x: x, y: y });
+        }
+    }
+
+</script>
+
+<style>
+
+    .this {
+        display: inline-block;
+        overflow: hidden;
+        position: absolute;
+    }
+
+    .this > * {
+        float: left;
+    }
+
+    .sizing {
+        display: inline-block;
+        overflow: hidden;
+        /*background-color: gray;*/
+    }
+
+    .sizing > * {
+        float: left;
+    }
+
+    .sizeablePaneContent {
+        /*background-color: gray;*/
+        overflow: hidden;
+    }
+</style>
+
+
+

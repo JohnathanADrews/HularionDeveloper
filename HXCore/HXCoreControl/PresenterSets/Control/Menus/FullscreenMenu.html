@@ -1,0 +1,142 @@
+﻿<!--
+MIT License
+
+Copyright (c) 2023 Johnathan A Drews
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+-->
+
+
+<hx h-proxy="show" />
+<hx h-proxy="hide" />
+<hx h-proxy="setContent" />
+<hx h-proxy="isVisible" />
+
+
+<hx h-component-handler="SetContent" h-method="setPresenterContent" />
+
+<div class="header" , h-handle="header">
+    <div class="close" h-handle="close" title="Close Fullscreen Mode"><label>x</label></div>
+</div>
+<div class="body" h-handle="body">
+    <div class="bodyInner" h-handle="bodyInner"></div>
+</div>
+
+<script>
+
+    function FullscreenMenu() {
+    }
+
+    FullscreenMenu.prototype = {
+
+        start: function (options) {
+
+            var t = this;
+            //console.log("FullscreenMenu - ", options, t);
+            t.hide();
+            t.close.on("click", ()=>{
+                t.hide();
+            });
+        },
+
+        show: function(){
+            var t = this;
+            t.hularion.principal.css("display", "");
+        },
+
+        hide: function(){
+            var t = this;
+            t.hularion.principal.css("display", "none");
+        },
+
+        setContent: function(view){
+            var t = this;
+            t.bodyInner.empty();
+            t.bodyInner.append(view);
+        },
+
+        setPresenterContent: function(proxy){
+            var t = this;
+            t.setContent(proxy.view);
+        },
+
+        isVisible: function(){
+            return this.hularion.principal.css("display") != "none";
+        }
+
+    }
+
+</script>
+
+
+<style>
+    .this {
+        user-select: none;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    .close {
+        border-style: solid;
+        border-width: 2px;
+        border-radius: 30px;
+        width: 30px;
+        height: 30px;
+        font-size: 40px;
+        display: inline-block;
+        margin-left: 50px;
+        margin-top: 50px;
+        cursor: pointer;
+    }
+
+        .close > * {
+            margin-top: -13px;
+            margin-left: 5px;
+            float: left;
+            cursor: pointer;
+        }
+
+    .body {
+        display: flex;
+        width: 100%;
+    }
+
+    .bodyInner {
+        float: left;
+        margin: 0 auto;
+    }
+</style>
+
+<style h-style-category-key="Theme" h-style-category-value="Light">
+    .this {
+        color: black;
+        border-color: lightgray;
+        background-color: rgba(255,255,255,.8);
+    }
+
+    .close {
+        color: black;
+        border-color: black;
+    }
+</style>
+<style h-style-category-key="Theme" h-style-category-value="Dark">
+    .this {
+        color: white;
+        border-color: darkgray;
+        background-color: rgba(0,0,0,.8);
+    }
+
+    .close {
+        color: white;
+        border-color: white;
+    }
+</style>
+

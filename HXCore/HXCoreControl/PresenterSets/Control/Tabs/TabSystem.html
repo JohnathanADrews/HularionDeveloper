@@ -1,0 +1,259 @@
+﻿<!--
+MIT License
+
+Copyright (c) 2023 Johnathan A Drews
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+-->
+
+<hx h-publisher="TabClosed" />
+<hx h-publisher="TabSelected" />
+
+<hx h-proxy="addTab" />
+<hx h-proxy="removeTab" />
+<hx h-proxy="createTab" />
+<hx h-proxy="createTabHeader" />
+<hx h-proxy="createTabBody" />
+<hx h-proxy="selectTab" />
+<hx h-proxy="selectFirstTab" />
+<hx h-proxy="selectLastTab" />
+<hx h-proxy="getTabs" />
+<hx h-proxy="getSelectedTab" />
+<hx h-proxy="getTabGivenHeader" />
+<hx h-proxy="getTabGivenBody" />
+<hx h-proxy="getHeaderBottom" />
+
+<hx h-component-handler="AddTabHeaderHandler" h-method="addTabHeader" h-encoding="json" />
+<hx h-component-handler="AddTabBodyHandler" h-method="addTabBody" h-encoding="json" />
+
+<hx h-presenter="hxCore.control.presenter/TabHeaderBar" h-handle="headerBar" class="headerBar" />
+<div class="tabBodiesContainer" h-handle="tabBodiesContainer"></div>
+
+
+<script>
+
+    function TabSystem() {
+        this.tabs = [];
+        //Map by proxy.view. Same proxy object is unreliable.
+        this.tabHeaders = new Map();
+        this.tabBodies = new Map();
+
+        this.selectedTab = null;
+    }
+
+    TabSystem.prototype = {
+
+        start: function (parameters) {
+            var t = this;
+
+            //console.log("TabSystem.start - ", parameters, t);
+
+        },
+
+        createTab: function () {
+            return {
+                header: hxCore.control.presenter.presenters.TabHeader.create(),
+                body: hxCore.control.presenter.presenters.TabBody.create()
+            };
+        },
+
+        createTabHeader: function () {
+            return hxCore.control.presenter.presenters.TabHeader.create();
+        },
+
+        createTabBody: function () {
+            return hxCore.control.presenter.presenters.TabBody.create();
+        },
+
+        addTab: function (tab) {
+            //tab: {header : TabHeader proxy, body: TabBody proxy}
+            var t = this;
+            if (tab == null) { tab = {}; }
+            t.tabs.push(tab);
+            if (tab.header == null) {
+                //console.log("TabSystem.addTab - ab.header == null ", tab);
+                tab.header = t.createTabHeader();
+            }
+            if (tab.body == null) {
+                //console.log("TabSystem.addTab - tab.body == null ", tab);
+                tab.body = t.createTabBody();
+            }
+            t.tabHeaders.set(tab.header.view, tab);
+            t.tabBodies.set(tab.body.view, tab);
+            t.headerBar.proxy.addTabHeader(tab.header);
+            t.tabBodiesContainer.append(tab.body.view);
+            tab.header.publisher.Clicked.subscribe(() => {
+                //console.log("TabSystem.addTab - tab.header.publisher.Clicked - ", tab, t);
+                t.selectTab(tab);
+                t.hularion.publisher.TabSelected.publish(tab);
+            });
+            //console.log("TabSystem.addTab - ", tab, t, t.getTabGivenHeader(tab.header));
+
+            tab.header.publisher.Close.subscribe(() => {
+                t.hularion.publisher.TabClosed.publish(tab);
+            });
+
+            if (t.tabs.length == 1) {
+                t.selectTab(tab);
+            }
+            return tab;
+        },
+
+        removeTab: function (tab) {
+            var t = this;
+            var newTabs = [];
+            t.tabs.forEach(x => {
+                if (tab.header.view != x.header.view) {
+                    newTabs.push(x);
+                }
+            });
+
+            t.tabs = newTabs;
+            t.tabHeaders.delete(tab.header.view);
+            t.tabBodies.delete(tab.body.view);
+            tab.header.view.remove();
+            tab.body.view.remove();
+
+
+            console.log("TabSystem.removeTab - ", t);
+            if (t.tabs.length > 0) {
+                t.selectTab(t.tabs[0]);
+            }
+        },
+
+        addTabHeader: function (tabHeader) {
+            var t = this;
+            //console.log("TabSystem.addTab - ", tabHeader, t, t.getTabGivenHeader(tabHeader));
+            var tab = { header: tabHeader };
+            t.addTab(tab);
+            return tab;
+        },
+
+        addTabBody: function (tabBody) {
+            var t = this;
+            var tab = { body: tabBody };
+            t.addTab(tab);
+            return tab;
+        },
+
+        selectTab: function (tab) {
+            var t = this;
+            t.tabs.forEach(x => {
+                x.header.proxy.deselect();
+                x.body.proxy.hide();
+            });
+            tab.header.proxy.select();
+            tab.body.proxy.show();
+            t.selectedTab = tab;
+        },
+
+        selectFirstTab: function () {
+            var t = this;
+            if (t.tabs.length > 0) {
+                t.selectTab(t.tabs[0]);
+            }
+        },
+
+        selectLastTab: function () {
+            var t = this;
+            if (t.tabs.length > 0) {
+                t.selectTab(t.tabs[t.tabs.length - 1]);
+            }
+        },
+
+        getTabs: function () {
+            var t = this;
+            var result = [];
+            for (var i = 0; i < t.tabs.length; i++) {
+                result.push(t.tabs[i]);
+            }
+            return result;
+        },
+
+        getTabGivenHeader: function (header) {
+            var t = this;
+            //console.log("TabSystem.getTabGivenHeader 1 - ", header, t.tabs, t);
+            //console.log("TabSystem.getTabGivenHeader 2 - ", t.tabHeaders.has(header.view), t.tabHeaders.get(header.view));
+            if (t.tabHeaders.has(header.view)) {
+                return t.tabHeaders.get(header.view);
+            }
+            return null;
+        },
+
+        getTabGivenBody: function (body) {
+            var t = this;
+            if (t.tabBodies.has(body.view)) {
+                return t.tabBodies.get(body.view);
+            }
+            return null;
+        },
+
+        getSelectedTab: function () {
+            return this.selectedTab;
+        },
+
+        getHeaderBottom: function () {
+            return this.headerBar.view[0].getBoundingClientRect().bottom;
+        }
+    }
+
+</script>
+<style>
+
+    .this {
+        display: inline-block;
+        margin: 0;
+        padding: 0;
+        display: inline-block;
+        overflow: hidden;
+    }
+
+        .this > * {
+            float: left;
+            margin-right: 10px;
+            /*margin-top: 4px;*/
+            margin-bottom: 4px;
+        }
+
+        .this * {
+        }
+
+        .this:hover {
+        }
+
+        .this *:hover {
+        }
+
+
+    .headerBar {
+        width: 100%;
+    }
+
+    .tabBodiesContainer {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+        .tabBodiesContainer > * {
+            width: 100%;
+        }
+</style>
+
+<style h-style-category-key="Theme" h-style-category-value="Light">
+    .textContent {
+        border-color: lightgray;
+    }
+</style>
+
+<style h-style-category-key="Theme" h-style-category-value="Dark">
+    .textContent {
+        border-color: lightgray;
+    }
+</style>
+

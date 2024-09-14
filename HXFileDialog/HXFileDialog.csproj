@@ -1,0 +1,76 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="HXFileDialog\Configuration\Algorithm.html" />
+    <None Remove="HXFileDialog\Configuration\Control.html" />
+    <None Remove="HXFileDialog\Configuration\FileDialog.html" />
+    <None Remove="HXFileDialog\HXFileDialog.hxproject" />
+    <None Remove="HXFileDialog\Plugin\FileRoute\HularionCore.dll" />
+    <None Remove="HXFileDialog\Plugin\FileRoute\HularionPlugin.dll" />
+    <None Remove="HXFileDialog\Plugin\FileRoute\HularionPlugin.FileSystem.dll" />
+    <None Remove="HXFileDialog\Plugin\FileRoute\HularionText.dll" />
+    <None Remove="HXFileDialog\Plugin\FileRoute\HularionText.Language.Json.dll" />
+    <None Remove="HXFileDialog\PresenterSets\Control\Button.html" />
+    <None Remove="HXFileDialog\PresenterSets\Control\Form.html" />
+    <None Remove="HXFileDialog\PresenterSets\Control\Navigation\ViewNavigationArray.html" />
+    <None Remove="HXFileDialog\PresenterSets\Control\Navigation\ViewNavigationPath.html" />
+    <None Remove="HXFileDialog\PresenterSets\Control\Pane\DraggablePane.html" />
+    <None Remove="HXFileDialog\PresenterSets\Control\Pane\SizeablePane.html" />
+    <None Remove="HXFileDialog\PresenterSets\Control\Pane\ViewPane.html" />
+    <None Remove="HXFileDialog\PresenterSets\Control\Pane\WindowPane.html" />
+    <None Remove="HXFileDialog\PresenterSets\Control\PopupWindow.html" />
+    <None Remove="HXFileDialog\PresenterSets\Control\TextBox.html" />
+    <None Remove="HXFileDialog\PresenterSets\Control\ViewContainer.html" />
+    <None Remove="HXFileDialog\PresenterSets\FileDialog\Bookmarks.html" />
+    <None Remove="HXFileDialog\PresenterSets\FileDialog\BookmarksDialog.html" />
+    <None Remove="HXFileDialog\PresenterSets\FileDialog\FileDialog.html" />
+    <None Remove="HXFileDialog\PresenterSets\FileDialog\FileSearch.html" />
+    <None Remove="HXFileDialog\PresenterSets\FileDialog\SelectDirectoryDialog.html" />
+    <None Remove="HXFileDialog\ScriptSets\Algorithm\API.js" />
+    <None Remove="HXFileDialog\ScriptSets\Algorithm\Control.js" />
+    <None Remove="HXFileDialog\ScriptSets\Algorithm\Set.js" />
+    <None Remove="HXFileDialog\ScriptSets\Algorithm\TreeTraverser.js" />
+    <None Remove="HXFileDialog\ScriptSets\Algorithm\ViewNavigationStack.js" />
+    <None Remove="HXFileDialog\ScriptSets\Import\jquery_min.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="HXFileDialog\Configuration\Algorithm.html" />
+    <EmbeddedResource Include="HXFileDialog\Configuration\Control.html" />
+    <EmbeddedResource Include="HXFileDialog\Configuration\FileDialog.html" />
+    <EmbeddedResource Include="HXFileDialog\HXFileDialog.hxproject" />
+    <EmbeddedResource Include="HXFileDialog\Plugin\FileRoute\HularionCore.dll" />
+    <EmbeddedResource Include="HXFileDialog\Plugin\FileRoute\HularionPlugin.dll" />
+    <EmbeddedResource Include="HXFileDialog\Plugin\FileRoute\HularionPlugin.FileSystem.dll" />
+    <EmbeddedResource Include="HXFileDialog\Plugin\FileRoute\HularionText.dll" />
+    <EmbeddedResource Include="HXFileDialog\Plugin\FileRoute\HularionText.Language.Json.dll" />
+    <EmbeddedResource Include="HXFileDialog\PresenterSets\Control\Button.html" />
+    <EmbeddedResource Include="HXFileDialog\PresenterSets\Control\HeaderTable.html" />
+    <EmbeddedResource Include="HXFileDialog\PresenterSets\Control\Navigation\ViewNavigationArray.html" />
+    <EmbeddedResource Include="HXFileDialog\PresenterSets\Control\Navigation\ViewNavigationPath.html" />
+    <EmbeddedResource Include="HXFileDialog\PresenterSets\Control\Pane\DraggablePane.html" />
+    <EmbeddedResource Include="HXFileDialog\PresenterSets\Control\Pane\SizeablePane.html" />
+    <EmbeddedResource Include="HXFileDialog\PresenterSets\Control\Pane\ViewPane.html" />
+    <EmbeddedResource Include="HXFileDialog\PresenterSets\Control\Pane\WindowPane.html" />
+    <EmbeddedResource Include="HXFileDialog\PresenterSets\Control\PopupWindow.html" />
+    <EmbeddedResource Include="HXFileDialog\PresenterSets\Control\Table.html" />
+    <EmbeddedResource Include="HXFileDialog\PresenterSets\FileDialog\Bookmarks.html" />
+    <EmbeddedResource Include="HXFileDialog\PresenterSets\FileDialog\BookmarksDialog.html" />
+    <EmbeddedResource Include="HXFileDialog\PresenterSets\FileDialog\FileDialog.html" />
+    <EmbeddedResource Include="HXFileDialog\PresenterSets\FileDialog\FileSearch.html" />
+    <EmbeddedResource Include="HXFileDialog\PresenterSets\FileDialog\SelectDirectoryDialog.html" />
+    <EmbeddedResource Include="HXFileDialog\ScriptSets\Algorithm\API.js" />
+    <EmbeddedResource Include="HXFileDialog\ScriptSets\Algorithm\Control.js" />
+    <EmbeddedResource Include="HXFileDialog\ScriptSets\Algorithm\Set.js" />
+    <EmbeddedResource Include="HXFileDialog\ScriptSets\Algorithm\TreeTraverser.js" />
+    <EmbeddedResource Include="HXFileDialog\ScriptSets\Control\ViewNavigationStack.js" />
+    <EmbeddedResource Include="HXFileDialog\ScriptSets\Import\jquery_min.js" />
+  </ItemGroup>
+
+</Project>

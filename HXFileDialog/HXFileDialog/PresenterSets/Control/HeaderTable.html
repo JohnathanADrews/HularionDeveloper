@@ -1,0 +1,199 @@
+﻿<!--
+MIT License
+
+Copyright (c) 2023 Johnathan A Drews
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+-->
+
+<hx h-proxy="appendColumn" />
+<hx h-proxy="appendRow" />
+<hx h-proxy="setContent" />
+<hx h-proxy="setColumnHeader" />
+<hx h-proxy="setRowHeader" />
+<hx h-proxy="setColumnWidth" />
+<hx h-proxy="setBaseRowHeight" />
+<hx h-proxy="clearAllRows" />
+<hx h-proxy="setWidth" />
+<hx h-proxy="setHeight" />
+
+<div class="rowContainer">
+    <div class="corner" h-handle="corner"></div>
+    <div class="rowsContainer" h-handle="rowsContainer" >
+        <hx h-presenter="Table" h-handle="rows" />
+    </div>
+</div>
+<div class="rightSide" h-handle="rightSide">
+    <div class="columnsContainer" h-handle="columnsContainer" >
+        <hx h-presenter="Table" h-handle="columns" />
+    </div>
+    <div class="cellsContainer" h-handle="cellsContainer" >
+        <hx h-presenter="Table" h-handle="cells" />
+    </div>
+</div>
+
+<script>
+
+    function HeaderTable() {
+        this.baseRowHeight = 24;
+    }
+
+    HeaderTable.prototype = {
+
+        start: function () {
+            var t = this;
+
+
+            //console.log("HeaderTable.start - ", t);
+            t.rows.proxy.appendColumn();
+            t.columns.proxy.appendRow();
+            t.columns.proxy.setBaseRowHeight(t.baseRowHeight);
+            t.rows.proxy.setBaseRowHeight(t.baseRowHeight);
+            t.cells.proxy.setBaseRowHeight(t.baseRowHeight);
+            t.corner.height(t.baseRowHeight + 4);
+
+            t.cellsContainer.on("scroll", () => {
+                t.rowsContainer[0].scrollTop = t.cellsContainer[0].scrollTop;
+                t.columnsContainer[0].scrollLeft = t.cellsContainer[0].scrollLeft;
+                //console.log("HeaderTable.t.cellsContainer[0].scrollLeft - ", t.cellsContainer[0].scrollLeft);
+            }); 
+            //t.columns.view.height(t.columns.proxy.getBaseRowHeight());
+        },
+
+        appendColumn: function () {
+            var t = this;
+            var index = t.cells.proxy.appendColumn();
+            t.columns.proxy.appendColumn();
+            t.setWidth(t.rows.proxy.getTableWidth() + t.cells.proxy.getTableWidth());
+            return index;
+        },
+
+        appendRow: function () {
+            var t = this;
+            var index = t.cells.proxy.appendRow();
+            t.rows.proxy.appendRow();
+            return index;
+        },
+
+        setContent: function (columnIndex, rowIndex, content) {
+            var t = this;
+            t.cells.proxy.setContent(columnIndex, rowIndex, content);
+        },
+
+        setColumnHeader: function (columnIndex, content) {
+            var t = this;
+            t.columns.proxy.setContent(columnIndex, 0, content);
+        },
+
+        setRowHeader: function (rowIndex, content) {
+            var t = this;
+            t.rows.proxy.setContent(0, rowIndex, content);
+        },
+
+        setColumnWidth: function (columnIndex, width) {
+            var t = this;
+            t.cells.proxy.setColumnWidth(columnIndex, width);
+            t.columns.proxy.setColumnWidth(columnIndex, width);
+            t.setWidth(t.rows.proxy.getTableWidth() + t.cells.proxy.getTableWidth());
+        },
+
+        setBaseRowHeight: function (height) {
+            var t = this;
+            t.cells.proxy.setBaseRowHeight(height);
+            t.rows.proxy.setBaseRowHeight(height);
+        },
+
+        clearAllRows: function () {
+            var t = this;
+            t.cells.proxy.clearAllRows();
+            t.rows.proxy.clearAllRows();
+        },
+
+        setHeight: function (height) {
+            var t = this;
+            t.hularion.principal.height(height);
+            t.rightSide.height(height);
+            t.rowsContainer.height(height);
+            t.cellsContainer.height(height + 20);
+        },
+
+        setWidth: function (width) {
+            var t = this;
+            t.hularion.principal.width(width);
+            var rightWidth = width - t.rows.proxy.getTableWidth();
+            if (rightWidth < 0) {
+                rightWidth = 0;
+            }
+            //console.log("HeaderTable.setWidth - ", width, rightWidth);
+            //if (width <= 0) {
+            //    console.error("HeaderTable.setWidth - width - ", width);
+            //}
+            t.rightSide.width(rightWidth);
+            t.columnsContainer.width(rightWidth - 17);
+        }
+
+    }
+
+
+</script>
+
+<style>
+
+    .this {
+        display: inline-block;
+        width: 100%;
+        /*border:solid 1px green;*/
+    }
+
+    .this > * {
+        float: left;
+    }
+
+    .rowContainer {
+        /*border:solid 1px green;*/
+    }
+    .cellsContainer {
+        overflow-x: scroll;
+        overflow-y: scroll;
+        /*scrollbar-color: blue green;*/
+    }
+    .columnsContainer {
+        overflow: hidden;
+        /*background-color: red;*/
+        /*border: solid 1px blue;*/
+    }
+    .cellsContainer {
+        padding-right: 0px;
+        /*background-color: green;*/
+        /*border: solid 1px red;*/
+    }
+    .rowsContainer {
+        overflow: hidden;
+    }
+    .corner {
+        padding: 0;
+        margin: 0;
+    }
+    .columns {
+        display: inline-block;
+        padding: 0;
+        margin: 0;
+        /*border: solid 1px grey;*/
+    }
+    .columns > * {
+        float:left;
+    }
+</style>
+
+<style h-style-category-key="Theme" h-style-category-value="Dark">
+
+    .corner {
+        background: linear-gradient(135deg, rgb(100,100,100) 0%, black 50%, black 100%);
+    }
+</style>
+

@@ -1,0 +1,173 @@
+﻿<!--
+MIT License
+
+Copyright (c) 2023 Johnathan A Drews
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+-->
+
+<hx h-publisher="Selected" />
+<hx h-publisher="Closed" />
+<hx h-proxy="show" />
+<hx h-proxy="hide" />
+<hx h-proxy="centerOnWindow" />
+<hx h-proxy="setTitle" />
+
+<hx h-handle="popupWindow" h-presenter="fCoreControl/PopupWindow">
+</hx>
+
+<hx h-presenter="FileSearch" h-handle="fileSearch" />
+
+<div h-clone="buttonContent" class="buttonContent"><label h-handle="text"></label></div>
+
+<hx h-presenter="fCoreControl/Button" h-handle="closeDialog" />
+<hx h-presenter="fCoreControl/Button" h-handle="selectDirectory" />
+
+<script>
+
+    function SelectDirectoryDialog() {
+        this.defaultWidth = 500;
+        this.defaultHeight = 300;
+    }
+
+    SelectDirectoryDialog.prototype = {
+
+        start: function (parameters) {
+            var t = this;
+            //console.log("SelectDirectoryDialog.start  - ", t);
+
+            var closeButton = t.hularion.createClone("buttonContent");
+            closeButton.handles.text[0].innerHTML = "X";
+            closeButton.view[0].title = "Close this dialog.";
+            t.closeDialog.proxy.setContent(closeButton.view[0]);
+            t.closeDialog.proxy.setWidth(18);
+            t.closeDialog.proxy.setHeight(18);
+            t.closeDialog.publisher.Clicked.subscribe(() => {
+                t.hide();
+                t.hularion.publisher.Closed.publish({});
+            });
+            t.popupWindow.proxy.addHeaderItem(t.closeDialog.view[0]);
+
+            var selectButton = t.hularion.createClone("buttonContent");
+            selectButton.handles.text[0].innerHTML = "S";
+            selectButton.view[0].title = "Select Current Directory";
+            t.selectDirectory.proxy.setContent(selectButton.view[0]);
+            t.selectDirectory.proxy.setWidth(18);
+            t.selectDirectory.proxy.setHeight(18);
+            t.selectDirectory.publisher.Clicked.subscribe(() => {
+                t.hide();
+                t.hularion.publisher.Selected.publish({ directory: t.fileSearch.proxy.getDirectory() });
+            });
+            t.popupWindow.proxy.addHeaderItem(t.selectDirectory.view[0]);
+
+            t.fileSearch.publisher.DirectoryOpened.subscribe((o, message) => {
+                t.popupWindow.proxy.setFooterMessage(message.path);
+            });
+            t.fileSearch.publisher.DirectoryAccessDenied.subscribe((o, message) => {
+                t.popupWindow.proxy.setFooterMessage(message.message);
+            });
+            t.fileSearch.publisher.FileSelected.subscribe((o, message) => {
+                t.popupWindow.proxy.setFooterMessage(message.fullPath);
+            });
+
+
+            //t.popupWindow.proxy.setTitle("Select A Directory");
+            t.popupWindow.proxy.setContent(t.fileSearch.view[0]);
+            //t.popupWindow.proxy.setTitle("Select Project Folder");
+            var width = t.defaultWidth;
+            var height = t.defaultHeight;
+            if (parameters != null && parameters.width != null) {
+                width = parameters.width;
+            }
+            if (parameters != null && parameters.height != null) {
+                height = parameters.height;
+            }
+            t.popupWindow.proxy.setSize(width, height);
+            //t.popupWindow.view.removeClass("hide");
+
+
+            t.popupWindow.publisher.SizeChanged.subscribe((o, size) => {
+                //console.log("FileDialog.start - popupWindow size -", size);
+                t.fileSearch.proxy.setSize(size.bodyWidth, size.bodyHeight );
+            });
+
+            //console.log("FileDialog.start width, height - ", width, height);
+            t.popupWindow.proxy.setSize(width, height);
+        },
+
+        show: function () {
+            this.hularion.principal.css("display", "block");
+        },
+
+        hide: function () {
+            this.hularion.principal.css("display", "none");
+        },
+
+        centerOnWindow: function () {
+            var t = this;
+            t.popupWindow.proxy.centerOnWindow();
+        },
+
+        setTitle: function (title) {
+            this.popupWindow.proxy.setTitle(title);
+        }
+
+    }
+
+</script>
+<style>
+
+    .this {
+        user-select: none;
+        display: inline-block;
+    }
+
+        .this > * {
+            float: left;
+        }
+
+        .this * {
+            user-select: none;
+        }
+
+    .buttonContent {
+        border-style: solid;
+        border-width: 1px;
+        width: 16px;
+        height: 16px;
+        text-align: center;
+        padding: 0;
+        margin: 0;
+        overflow: hidden;
+        font-size:16px;
+        display:inline-block;
+    }
+
+        .buttonContent * {
+            padding: 0;
+            margin: 0;
+            margin-left:2px;
+            float: left;
+        }
+</style>
+
+
+<style h-style-category-key="Structure" h-style-category-value="Standard">
+</style>
+
+
+<style h-style-category-key="Theme" h-style-category-value="Light">
+</style>
+
+<style h-style-category-key="Theme" h-style-category-value="Dark">
+
+    .this {
+        background-color: black;
+    }
+</style>
+

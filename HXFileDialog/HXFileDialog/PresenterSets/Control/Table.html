@@ -1,0 +1,464 @@
+﻿<!--
+MIT License
+
+Copyright (c) 2023 Johnathan A Drews
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+-->
+
+<hx h-proxy="getColumnCount=>GetColumnCount" />
+<hx h-proxy="getRowCount=>GetRowCount" />
+<hx h-proxy="appendColumn" />
+<hx h-proxy="appendColumns" />
+<hx h-proxy="appendRow=>appendRow" />
+<hx h-proxy="appendRows=>appendRows" />
+<hx h-proxy="clearAllColumns=>clearAllColumns" />
+<hx h-proxy="clearAllRows=>clearAllRows" />
+<hx h-proxy="setContent" />
+<hx h-proxy="getContent=>GetContent" />
+<hx h-proxy="getCell=>getCell" />
+<hx h-proxy="blankCell=>BlankCell" />
+<hx h-proxy="getTableWidth=>GetTableWidth" />
+<hx h-proxy="getTableHeight=>GetTableHeight" />
+<hx h-proxy="getBaseColumnWidth=>GetBaseColumnWidth" />
+<hx h-proxy="setBaseColumnWidth=>SetBaseColumnWidth" />
+<hx h-proxy="getBaseRowHeight=>GetBaseRowHeight" />
+<hx h-proxy="setBaseRowHeight" />
+<hx h-proxy="getColumnWidth=>GetColumnWidth" />
+<hx h-proxy="setColumnWidth" />
+<hx h-proxy="getRowHeight=>GetRowHeight" />
+<hx h-proxy="setRowHeight=>SetRowHeight" />
+<hx h-proxy="createCell=>createCell" />
+<hx h-proxy="insertColumn=>InsertColumn" />
+
+<div class="tableBorder" h-handle="tableBorder">
+    <div class="tableCellContainer" h-handle="tableCellContainer">
+        <div class="tableStart" h-handle="tableStart">
+            <label>start</label>
+        </div>
+    </div>
+</div>
+
+<div class="templates">
+    <div class="cell" h-clone="cell"></div>
+    <div class="defaultContent" h-clone="default"><label>x &nbsp;</label></div>
+</div>
+
+<script>
+
+    function Table() {
+        this.columns = [];
+        this.rows = [];
+        this.columnCount = 0;
+        this.rowCount = 0;
+        this.baseColumnWidth = 30;
+        this.baseRowHeight = 30;
+        this.specifiedColumnWidths = {};
+        this.specifiedRowHeights = {};
+        this.cells = {};
+        this.tableBorder = null;
+        this.tableCellContainer = null;
+        this.tableStart = null;
+        this.renderedColumns = 0;
+
+        this.columnHeaderTable = null;
+        this.rowHeaderTable = null;
+    }
+
+    Table.prototype = {
+
+        start: function () {
+            var t = this;
+
+            //console.log("Table.start - ", t, hxCore.control.presenter);
+            //console.log("Table.start - algorithm", algorithm);
+        },
+
+        getColumnHeaderTable: function () {
+            var t = this;
+            if (t.columnHeaderTable == null) {
+                t.columnHeaderTable = hxCore.control.presenter.presenters.Table.create();
+                t.columnHeaderTable.appendColumns(t.GetColumnCount());
+                t.columnHeaderTable.appendRow();
+            }
+            return t.columnHeaderTable;
+        },
+
+        GetColumnCount: function () {
+            return this.columnCount;
+        },
+
+        GetRowCount: function () {
+            return this.rowCount;
+        },
+
+        setContent: function (columnIndex, rowIndex, content) {
+            var t = this;
+            var cell = t.getCell(columnIndex, rowIndex);
+            if (cell != null) {                 
+                cell.empty();                 
+                cell.append(content);             
+            }
+        },
+
+        GetContent: function (columnIndex, rowIndex) {
+            var t = this;
+            var cell = t.getCell(columnIndex, rowIndex);
+            return cell == null ? null : $(cell.find("> *"));
+        },
+
+        getCell: function (columnIndex, rowIndex) {
+            var t = this;
+            //console.log("Table.getCell -  - ", columnIndex, rowIndex, rowIndex * t.columnCount + columnIndex + 2);
+            var cell = t.tableCellContainer.find("> *:nth-child(" + (rowIndex * t.columnCount + columnIndex + 2) + ")");
+            if (cell == null || cell.length != 1) { return null; }
+            //console.log("Table.getCell 2-  - ", cell);
+            return cell;
+        },
+
+        BlankCell: function (columnIndex, rowIndex) {
+            this.setContent(columnIndex, rowIndex, "&nbsp;");
+        },
+
+        GetTableWidth: function () {
+            var t = this;
+            var custom = 0;
+            var width = 0;
+            algorithm.control.processIterator(0, t.columnCount - 1, j => {
+                if (t.specifiedColumnWidths[j] != null) {
+                    custom++;
+                    width += t.specifiedColumnWidths[j];
+                }
+            });
+            width += t.baseColumnWidth * (t.columnCount - custom);
+            return width;
+        },
+
+        GetTableHeight: function () {
+            var t = this;
+            var custom = 0;
+            var height = 0;
+            algorithm.control.processIterator(0, t.rowCount - 1, i => {
+                if (t.specifiedRowHeights[i] != null) {
+                    custom++;
+                    height += t.specifiedRowHeights[i];
+                }
+            });
+            height += t.baseRowHeight * (t.rowCount - custom);
+            return height;
+        },
+
+        SetBaseColumnWidth: function (width) {
+            var t = this;
+            t.baseColumnWidth = width;
+            t.UpdateDimensions();
+        },
+
+        GetBaseColumnWidth: function () {
+            return this.baseColumnWidth;
+        },
+
+        setBaseRowHeight: function (height) {
+            var t = this;
+            t.baseRowHeight = height;
+            t.UpdateDimensions();
+        },
+
+        GetBaseRowHeight: function () {
+            return this.baseRowHeight;
+        },
+
+        SetColumnsWidth: function (columnIndices, width) {
+            var t = this;
+            algorithm.control.processArray(columnIndices, index => { t.specifiedColumnWidths[index] = width; });
+            t.UpdateDimensions();
+        },
+
+        setColumnWidth: function (columnIndex, width) {
+            this.SetColumnsWidth([columnIndex], width);
+        },
+
+        ClearColumnWidths: function () {
+            var t = this;
+            t.specifiedColumnWidths = {};
+            t.UpdateDimensions();
+        },
+
+        SetRowsHeight: function (rowIndices, height) {
+            var t = this;
+            algorithm.control.processArray(rowIndices, index => { t.specifiedRowHeights[index] = height; });
+            t.UpdateDimensions();
+        },
+
+        SetRowHeight: function (rowIndex, height) {
+            this.SetRowsHeight([rowIndex], height);
+        },
+
+        ClearRowHeights: function () {
+            var t = this;
+            t.specifiedRowHeights = {};
+            t.UpdateDimensions();
+        },
+
+        GetColumnWidth: function (index) {
+            var t = this;
+            if (t.specifiedColumnWidths[index] != null) { return t.specifiedColumnWidths[index]; }
+            return t.baseColumnWidth;
+        },
+
+        GetRowHeight: function (index) {
+            var t = this;
+            if (t.specifiedRowHeights[index] != null) { return t.specifiedRowHeights[index]; }
+            return t.baseRowHeight;
+        },
+
+        createCell: function (columnIndex, rowIndex) {
+            var t = this;
+            var cell = t.hularion.createClone("cell");
+            //console.log("Table.createCell 1 -", columnIndex, rowIndex, cell);
+            var key = t.MakeKey(columnIndex, rowIndex);
+            cell.view.append(t.hularion.createClone("default").view);
+            var width = t.baseColumnWidth;
+            var height = t.baseRowHeight;
+            if (t.specifiedRowHeights[rowIndex] != null) {
+                height = t.specifiedRowHeights[rowIndex];
+            }
+            if (t.specifiedColumnWidths[columnIndex] != null) {
+                width = t.specifiedColumnWidths[columnIndex];
+            }
+            cell.view.attr("style", "width:" + width + "px;height:" + height + "px;");
+            return cell.view;
+        },
+
+        UpdateDimensions: function () {
+            var t = this;
+            //console.log("Table.UpdateDimensions 1 -", t.GetTableWidth(), t.GetTableHeight());
+            t.tableBorder.attr("style", "width:" + t.GetTableWidth() + "px;height:" + t.GetTableHeight() + "px;");
+            algorithm.control.processIterator(0, t.rowCount - 1, i => {
+                algorithm.control.processIterator(0, t.columnCount - 1, j => {
+                    var width = t.baseColumnWidth;
+                    var height = t.baseRowHeight;
+                    if (t.specifiedColumnWidths[j] != null) { width = t.specifiedColumnWidths[j]; }
+                    if (t.specifiedRowHeights[i] != null) { height = t.specifiedRowHeights[i]; }
+                    t.getCell(j, i).attr("style", "width:" + width + "px;height:" + height + "px;");
+                });
+            });
+        },
+
+        MakeKey(columnIndex, rowIndex) {
+            return "I-" + columnIndex + "-" + rowIndex;
+        },
+
+        SetTableStyle: function (style) {
+            this.tableCellContainer.attr("style", style);
+        },
+
+        reIndex: function (columnIndex, rowIndex, columnOffset, rowOffset) {
+            var t = this;
+            algorithm.control.processReverseIterator(t.columnCount - 1, columnIndex, j => {
+                algorithm.control.processReverseIterator(t.rowCount - 1, rowIndex, i => {
+                    var content = t.GetContent(j, i);
+                    if (content == null) { delete t.cells[t.MakeKey(j + columnOffset, i + rowOffset)]; }
+                    else { t.cells[t.MakeKey(j + columnOffset, i + rowOffset)] = content; }
+                });
+            });
+            algorithm.control.processIterator(columnIndex, columnIndex + columnOffset - 1, j => {
+                algorithm.control.processIterator(0, t.rowCount - 1, i => {
+                    delete t.cells[t.MakeKey(j, i)];
+                });
+            });
+            algorithm.control.processIterator(rowIndex, rowIndex + rowOffset - 1, i => {
+                algorithm.control.processIterator(0, t.columnCount - 1, j => {
+                    delete t.cells[t.MakeKey(j, i)];
+                });
+            });
+        },
+
+        InsertColumn: function (columnIndex) {
+            this.InsertColumns(columnIndex, 1);
+        },
+
+        InsertColumns: function (columnIndex, count) {
+            var t = this;
+            if (count == null) { count = 1; }
+            if (columnIndex < 0) { columnIndex = 0; }
+            if (columnIndex == null) { columnIndex = t.columnCount; }
+
+            if (columnIndex >= t.columnCount) {
+                algorithm.control.processReverseIterator(t.rowCount - 1, 0, i => {
+                    var start = t.getCell(t.columnCount - 1, i);
+                    if (start == null) { start = t.tableStart; }
+                    algorithm.control.processIterator(1, count, j => { start.after(t.createCell(t.columnCount, i)); });
+                });
+            }
+            else {
+                algorithm.control.processReverseIterator(t.rowCount - 1, 0, i => {
+                    var start = t.getCell(columnIndex, i);
+                    if (start == null) { start = t.tableStart; }
+                    else { start = start.prev(); }
+                    algorithm.control.processIterator(1, count, j => { start.after(t.createCell(columnIndex, i)); });
+                });
+            }
+            t.columnCount += count;
+
+            algorithm.control.processReverseIterator(t.columnCount - 1, columnIndex + count, j => {
+                if (t.specifiedColumnWidths[j - count] != null) {
+                    t.specifiedColumnWidths[j] = t.specifiedColumnWidths[j - count];
+                    delete t.specifiedColumnWidths[j - count];
+                }
+            });
+
+            t.UpdateDimensions();
+        },
+
+        appendColumn: function () {
+            this.appendColumns(1);
+            return this.columnCount - 1;
+        },
+
+        appendColumns: function (count) {
+            var t = this;
+            t.InsertColumns(t.columnCount, count);
+        },
+
+        prependColumn: function () {
+            this.InsertColumns(0, 1);
+        },
+
+        prependColumns: function (count) {
+            this.InsertColumns(0, count);
+        },
+
+        MoveColumns: function (oldIndex, newIndex, count) {
+            var t = this;
+            if (oldIndex < 0 || newIndex < 0 || oldIndex > t.columnCount - count || newIndex >= t.columnCount || oldIndex == newIndex) { return; }
+
+            if (oldIndex > newIndex) {
+                algorithm.control.processIterator(0, t.rowCount - 1, i => {
+                    var start = t.getCell(newIndex - 1, i);
+                    algorithm.control.processIterator(1, count, j => {
+                        start.after(t.getCell(oldIndex, i));
+                    });
+                });
+            }
+            else if (oldIndex + count <= newIndex) {
+                algorithm.control.processIterator(0, t.rowCount - 1, i => {
+                    var start = t.getCell(newIndex, i);
+                    algorithm.control.processIterator(0, count - 1, j => {
+                        start.after(t.getCell(oldIndex + j, i));
+                    });
+                });
+            }
+        },
+
+        MoveColumn: function (oldIndex, newIndex) {
+            this.MoveColumns(oldIndex, newIndex, 1);
+        },
+
+        GetContentIndices: function (item) {
+            var t = this;
+            var cell = item.closest(".cell");
+            var indices = {};
+            indices.column = (cell.index() - 1) % t.columnCount | 0;
+            indices.row = (cell.index() - 1) / t.columnCount | 0;
+            return indices;
+        },
+
+        InsertRows: function (rowIndex, count) {
+            var t = this;
+            if (count == null) { count = 1; }
+            var start = t.tableCellContainer.find("> *:last");
+            if (rowIndex < 0) { rowIndex = 0; }
+            if (rowIndex == null) { rowIndex = t.rowCount; }
+            if (rowIndex < t.rowCount) { start = t.getCell(0, rowIndex).prev(); }
+            t.rowCount += count;
+            if (t.columnCount <= 0) { return; }
+            if (start == null) { start = t.tableStart; }
+            //for(var i=1;i<=count;i++) {
+            //    for(var j=t.columnCount - 1;j>=0;j++){
+            //        start.after(t.createCell(j, rowIndex, t.getCell(j, rowIndex)));
+            //    }
+            //}
+            algorithm.control.processIterator(1, count, i => {
+                algorithm.control.processReverseIterator(t.columnCount - 1, 0, j => { start.after(t.createCell(j, rowIndex, t.getCell(j, rowIndex))); });
+            });
+            t.UpdateDimensions();
+            return rowIndex;
+        },
+
+        appendRow: function () {
+            this.appendRows(1);
+            return this.rowCount - 1;
+        },
+
+        appendRows: function (count) {
+            var t = this;
+            t.InsertRows(t.GetRowCount(), count);
+        },
+
+        prependRow: function () {
+            this.prependRows(count);
+        },
+
+        prependRows: function (count) {
+            var t = this;
+            t.appendRows(count);
+            t.ShiftDown(0, count);
+        },
+
+        clearAllColumns: function () {
+            var t = this;
+
+        },
+
+        clearAllRows: function () {
+            var t = this;
+            var index = 0;
+            while (t.tableStart.next().length > 0) {
+                t.tableStart.next().remove();
+            }
+            t.rowCount = 0;
+        }
+
+    }
+
+
+</script>
+
+<style>
+
+    .this {
+        display: inline-block;
+    }
+
+    .this > * {
+        float: left;
+    }
+
+    .tableBorder {
+        overflow: hidden;
+        display: inline-block;
+    }
+
+    .tableBorder > .tableCellContainer {
+        overflow: hidden;
+        display: inline-block;
+    }
+
+    .tableBorder > .tableCellContainer > .cell {
+        overflow: hidden;
+        float: left;
+    }
+
+    .tableStart {
+        height: 0;
+        width: 0;
+        display: none;
+    }
+</style>
+

@@ -1,0 +1,146 @@
+﻿<!--
+MIT License
+
+Copyright (c) 2023 Johnathan A Drews
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+-->
+
+<hx h-proxy="setView" h-method="setView" />
+<hx h-system-subscriber="SizeChanged" h-method="sizeChanged" />
+<!--<hx h-component-handler="SetPresenterHandler" h-method="setPresenter" />-->
+
+<script>
+
+    function ViewContainer() {
+        this.navigationArray = null;
+        this.previewedPath = null;
+    }
+
+    ViewContainer.prototype = {
+
+        start: function () {
+            var t = this;
+            console.log("ViewContainer.start - ", t);
+        },
+
+        setPresenter: function (presenter) {
+            this.setView(presenter.view);
+        },
+
+        setView: function (view) {
+            var t = this;
+            t.hularion.principal.empty();
+            t.hularion.principal.append(view);
+        },
+
+        sizeChanged: function (newSize, oldSize) {
+            var t = this;
+            console.log("ViewContainer.SizeChanged - ", newSize, oldSize);
+            //t.lastSize = newSize;
+            //var newHeight = newSize.height;
+            //if (newHeight < t.minimumHeight) { newHeight = t.minimumHeight; }
+            //var offset = newHeight;
+            //if (offset > t.listItems.height()) { offset = t.listItems.height(); }
+            //offset += t.headersContainer.height() - 3;
+
+            //t.listContent.attr("style", "top: -" + offset + "px;");
+            //t.bordersContainer.height(offset);
+
+        }
+    }
+
+</script>
+
+<style>
+    .this * {
+        user-select: none;
+    }
+
+    .pathList {
+        list-style-type: none;
+        text-align: left;
+        display: inline-block;
+    }
+
+        .pathList li {
+            float: left;
+        }
+
+    .segmentName * {
+        cursor: pointer;
+    }
+
+    .segmentSeparator {
+        cursor: default;
+    }
+</style>
+
+<style h-style-category-key="Theme" h-style-category-value="Light">
+</style>
+
+<style h-style-category-key="Theme" h-style-category-value="Dark">
+    .this {
+        background-color: black;
+    }
+
+    .segmentName > *:hover {
+        color: black;
+        background-color: white;
+    }
+
+    .separator {
+        background: radial-gradient(ellipse at center, rgba(255,255,255,100) 0%,#000000 48%,#000000 52%, rgba(0,0,0,0) 52%, rgba(0,0,0,0) 100%);
+    }
+
+    .previewed {
+        background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 80%, rgba(255, 255, 255, 1) 82%, rgba(255, 255, 255, 1) 83%, rgba(0, 0, 0, 0) 90%);
+    }
+</style>
+
+<style h-style-category-key="Structure" h-style-category-value="Standard">
+    .this > .pathList {
+        padding-left: 5px;
+        padding-right: 5px;
+        margin: 0;
+    }
+
+    .pathList li {
+        margin: 0;
+        padding: 2px;
+    }
+
+    .segmentName * {
+        font-size: 18px;
+    }
+
+    .segmentName {
+        padding-left: 2px;
+        padding-right: 2px;
+    }
+
+    .segmentSeparator {
+        margin: 6px;
+        padding-top: 4px;
+    }
+
+    .segmentName > *:hover {
+        font-weight: bold;
+        border-radius: 4px;
+        padding-left: 2px;
+        padding-right: 2px;
+    }
+
+    .separator {
+        width: 15px;
+        height: 15px;
+        margin-top: 3px;
+    }
+</style>
+
+

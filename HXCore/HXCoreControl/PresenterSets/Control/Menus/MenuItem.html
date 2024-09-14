@@ -1,0 +1,348 @@
+﻿<!--
+MIT License
+
+Copyright (c) 2023 Johnathan A Drews
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+-->
+
+<hx h-component-handler="AddMenuItemHandler" h-method="addSubItem" h-encoding="json" />
+
+<hx h-publisher="Clicked" h-encoding="json" />
+
+<hx h-proxy="setName" h-method="setName" />
+<hx h-proxy="getName" h-method="getName" />
+<hx h-proxy="setTitle" h-method="setTitle" />
+<hx h-proxy="getTitle" h-method="getTitle" />
+<hx h-proxy="setTitleWidth" h-method="setTitleWidth" />
+<hx h-proxy="setSubMenuBottom" h-method="setSubMenuBottom" />
+<hx h-proxy="setSubMenuRight" h-method="setSubMenuRight" />
+
+<div h-clone="spacer" class="spacer"><label h-handle="spacerTitle"></label></div>
+<div class="menuItemContainer" h-handle="itemContainer">
+    <div class="itemTitle treeNotHovered" h-handle="title"><label h-handle="titleName"></label></div>
+    <div class="menuItemCover" h-handle="clicker"></div>
+</div>
+<div class="subMenuItems hide" h-handle="subItemsContainer">
+    <!--<div h-handle="spacer" class="spacer"></div>-->
+</div>
+
+<div h-clone="newLine" class="newLine"></div>
+
+<script>
+
+    function MenuItem() {
+        this.subMode = MenuItem.SubItemsMode.Right;
+        this.appliedWidth = 0;
+        this.contentWidth = 0;
+        this.subMenuItems = [];
+    }
+    MenuItem.SubItemsMode = {
+        Right: "right",
+        bottom: "bottom"
+    };
+
+    MenuItem.prototype = {
+
+        Start: function (parameters) {
+            var t = this;
+
+            if (parameters != null) {
+                if (parameters.name != null) {
+                    this.setName(parameters.name);
+                }
+            }
+
+            t.clicker.on("click", function (e) {
+                t.hularion.publisher.Clicked.publish();
+            });
+
+
+            t.hularion.principal.on("mouseenter", () => {
+                t.title.removeClass("treeNotHovered");
+                t.title.addClass("treeHovered");
+                t.expandContainerWidth();
+                if (t.subMode == MenuItem.SubItemsMode.Bottom) {
+                    //console.log("MenuItem.clicker - t.subMode == MenuItem.SubItemsMode.Bottom", t);
+                    t.subItemsContainer.css("margin-top", "16px");
+                    t.subItemsContainer.css("margin-top", "-2px");
+                    //t.clicker.css("margin-left", "-1" + (t.title.width()) + "px");
+                }
+                if (t.subMode == MenuItem.SubItemsMode.Right) {
+                    //t.hularion.principal.width(0);
+                    //var subRect = t.subItemsContainer[0].getBoundingClientRect();
+                    t.subItemsContainer.css("margin-left", (t.title.width() + 10) + "px");
+                    t.subItemsContainer.css("margin-top", "-20px");
+                    //t.clicker.css("margin-left", "-1" + (t.clicker.width()) + "px");
+                    //console.log("MenuItem.clicker - t.subMode == MenuItem.SubItemsMode.Right", subRect);
+                }
+                t.subItemsContainer.removeClass("hide");
+            });
+            t.hularion.principal.on("mouseleave", () => {
+                if (t.subMode == MenuItem.SubItemsMode.Right) {
+                    t.contractContainerWidth();
+                }
+                t.subItemsContainer.addClass("hide");
+                t.title.removeClass("treeHovered");
+                t.title.addClass("treeNotHovered");
+            });
+        },
+
+        setName: function (name) {
+            var t = this;
+            //console.log("MenuItem.setName - ", t, name);
+            this.titleName.html(name);
+            var width = document.createElement("canvas").getContext("2d").measureText(t.getName()).width + 8;
+            t.setTitleWidth(width)
+        },
+
+        getName: function (name) {
+            return this.titleName.html();
+        },
+
+        setTitle: function (title) {
+            this.titleName.attr("title", title);
+        },
+
+        getTitle: function (title) {
+            return this.titleName.attr("title");
+        },
+
+        addSubItem: function (menuItem, parameters) {
+            var t = this;
+            t.subMenuItems.push(menuItem);
+            t.subItemsContainer.append(menuItem.view);
+            t.subItemsContainer.append(t.hularion.createClone("newLine").view);
+            menuItem.publisher.Clicked.subscribe(() => {
+                t.subItemsContainer.addClass("hide");
+            });
+
+            var width = document.createElement("canvas").getContext("2d").measureText(menuItem.proxy.getName()).width + 18;
+            //console.log("MenuItem.addSubItem - ", menuItem, width);
+            if (width > t.contentWidth) {
+                t.contentWidth = width;
+                //t.subItemsContainer.width(width);
+                for (var i = 0; i < t.subMenuItems.length; i++) {
+                    //console.log("MenuItem.addSubItem setTitleWidth- ", width);
+                    t.subMenuItems[i].proxy.setTitleWidth(width);
+                }
+            }
+            else {
+                menuItem.proxy.setTitleWidth(t.contentWidth);
+            }
+        },
+
+        setSubMenuBottom: function () {
+            var t = this;
+            t.subMode = MenuItem.SubItemsMode.Bottom;
+            //t.itemContainer.css("float", "none");
+            //t.subItemsContainer.css("float", "none");
+            t.subItemsContainer.css("position", "absolute");
+            t.subItemsContainer.css("margin-top", "20px");
+            t.subItemsContainer.css("margin-left", "-2px");
+        },
+
+        setSubMenuRight: function () {
+            var t = this;
+            t.subMode = MenuItem.SubItemsMode.Right;
+            t.subItemsContainer.css("position", "absolute");
+            //t.subItemsContainer.css("top", "-22px");
+            //t.itemContainer.css("float", "left");
+            //t.subItemsContainer.css("float", "left");
+        },
+
+        setTitleWidth: function (width) {
+            var t = this;
+            t.appliedWidth = width;
+            //console.log("MenuItem.setTitleWidth - ", width);
+            t.title.width(width);
+            t.clicker.width(width + 12);
+            t.clicker.css("margin-left", (-1 * width - 12) + "px");
+            t.contractContainerWidth(width);
+            //t.hularion.principal.width(width);
+            //t.itemContainer.width(width);
+            //t.clicker.css("margin-left", "-60px");
+        },
+
+        contractContainerWidth: function () {
+            var t = this;
+            t.hularion.principal.css("width", (t.appliedWidth + 12) + "px");
+        },
+
+        expandContainerWidth: function () {
+            var t = this;
+            t.hularion.principal.css("width", "auto");
+        }
+    }
+
+</script>
+
+<style>
+    .this {
+        border-style: solid;
+        border-width: 1px;
+        display: inline-block;
+        border-style: solid;
+        border-width: 1px;
+        border-color: transparent;
+        margin: 0;
+        padding: 0;
+        font-size: 14px;
+        height: 12px;
+        /*background-color: rgba(0, 216, 255, .5);*/
+        /*width: 0;*/
+    }
+
+        .this > * {
+            /*float:left;*/
+        }
+
+    .menuItemContainer {
+        /*display: inline-block;*/
+        /*background-color:red;*/
+        /*width: 100%;*/
+        display: block;
+        /*height:10px;*/
+        height: 18px;
+        /*width:0;*/
+    }
+
+        .menuItemContainer > * {
+        }
+
+    .itemTitle {
+        display: inline-block;
+        padding-left: 5px;
+        padding-right: 5px;
+        white-space: nowrap;
+        /*text-align: center;*/
+        float: left;
+        border-style: solid;
+        border-width: 1px;
+        text-align: left;
+        overflow: hidden;
+        /*width: 100%;*/
+        /*width: calc(100% - 12px);*/
+        /*border-color: red;*/
+    }
+
+    .menuItemCover {
+        /*width: 100%;*/
+        height: 18px;
+        /*margin-top: -14px;*/
+        float: left;
+        /*background-color: rgba(255, 216, 0, .5);*/
+        /*width: calc(100% - 32px);*/
+        /*margin-top: -18px;*/
+    }
+
+    .subMenuItems {
+        /*position: absolute;*/
+        /*width: 9999px;*/
+        border: solid 1px transparent;
+        /*min-height: 20px;*/
+        /*margin-left: -2px;*/
+        /*background-color: red;*/
+        float: right;
+        height: 18px;
+    }
+
+        .subMenuItems > * {
+            width: calc(100% - 2px);
+        }
+
+    .newLine {
+        width: 100%;
+        height: 0px;
+        margin: 0;
+        padding: 0;
+        background-color: transparent;
+    }
+/*
+    .spacer{
+        height:1px;
+        overflow:hidden;
+    }*/
+</style>
+
+<style h-style-category-key="Theme" h-style-category-value="Light">
+    /* .menuItemContainer {
+        background-color: white;
+        color: black;
+    }*/
+    /*
+    .subMenuItems {
+        background-color: white;
+        color: black;
+    }*/
+
+    .itemTitle {
+        border-color: lightgray;
+        background-color: white;
+        color: black;
+    }
+/*
+    .newLine {
+        background-color: lightgray;
+    }*/
+
+    .menuItemCover:hover {
+        background: linear-gradient(180deg, rgba(0,0,0,0) 75.5%, rgba(117, 228, 243, 0.85) 75.5%, rgba(117, 228, 243, 0.85) 76.5%, rgba(0,0,0,0) 100%);
+    }
+
+    .treeNotHovered {
+        border-color: lightgray;
+    }
+
+    .treeHovered {
+        border-color: rgb(1, 43, 242);
+    }
+</style>
+
+<style h-style-category-key="Theme" h-style-category-value="Dark">
+    /*    .menuItemContainer {
+        background-color: black;
+        color: white;
+    }*/
+
+    /*
+    .subMenuItems {
+        background-color: black;
+        color: white;
+    }*/
+/*
+    .menuItemContainer:hover {
+        background-color: rgba(117, 228, 243, 0.85);
+    }
+
+    .menuItemContainer:hover {
+        background-color: rgba(117, 228, 243, 0.85);
+    }*/
+    .menuItemCover:hover {
+        background: linear-gradient(180deg, rgba(0,0,0,0) 75.5%, rgba(117, 228, 243, 0.85) 75.5%, rgba(117, 228, 243, 0.85) 76.5%, rgba(0,0,0,0) 100%);
+    }
+
+    .itemTitle {
+        background-color: black;
+        color: white;
+    }
+
+    .treeNotHovered {
+        border-color: lightgray;
+    }
+
+    .treeHovered {
+        border-color: rgba(117, 228, 243, 1);
+    }
+
+/*
+    .newLine {
+        background-color: lightgray;
+    }*/
+
+</style>

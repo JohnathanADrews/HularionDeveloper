@@ -1,0 +1,91 @@
+﻿<!--
+MIT License
+
+Copyright (c) 2023 Johnathan A Drews
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+-->
+
+
+<hx h-publisher="DragDelta" />
+
+<hx h-proxy="setContent" />
+<hx h-proxy="setWidth" />
+<hx h-proxy="setHeight" />
+<hx h-proxy="setSize" />
+
+
+<script>
+
+    function DraggablePane() {
+        this.dragThis = false;
+        this.dragAlongs = [];
+    }
+
+    DraggablePane.prototype = {
+
+        start: function () {
+            var t = this;
+            //console.log("DraggablePane.start - ", t);
+
+            var dragger = (e) => {
+                t.hularion.publisher.DragDelta.publish({ dx: e.movementX, dy: e.movementY });
+            };
+            var releaseDragger = (e) => {
+                t.hularion.window.removeEventListener("mouseup", releaseDragger);
+                t.hularion.window.removeEventListener("mousemove", dragger);
+            };
+            t.hularion.principal[0].addEventListener("mousedown", e => {
+                t.hularion.window.addEventListener("mousemove", dragger);
+                t.hularion.window.addEventListener("mouseup", releaseDragger);
+            });
+
+        },
+
+        setContent: function (content) {
+            this.hularion.principal.append(content);
+        },
+
+        setWidth: function (width) {
+            var t = this;
+            t.hularion.principal.width(width);
+        },
+
+        setHeight: function (height) {
+            var t = this;
+            t.hularion.principal.height(height);
+        },
+
+        setSize: function (width, height) {
+            var t = this;
+            t.setWidth(width, false);
+            t.setHeight(height, false);
+        },
+
+        addDragAlong: function (view) {
+            this.dragAlongs.push(view);
+        },
+
+        setDragThis: function (dragThis) {
+            this.dragThis = dragThis;
+        }
+
+    }
+
+</script>
+
+<style>
+
+    .this {
+        overflow: hidden;
+    }
+
+</style>
+
+
+
