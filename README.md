@@ -10,6 +10,8 @@
 
 ## Using Hularion Experience (HX)
 
+Document 1 - Getting Started https://github.com/JohnathanADrews/HularionExperience/blob/main/docs/GettingStarted/GettingStarted.md
+
 The documentation for creating applications is in the Hularion Experience repository, https://github.com/JohnathanADrews/HularionExperience. I am also working on adding some sample projects. In the meantime, feel free to check out the sample Cardarion game. Use the release tag on this repo to get the desktop environment, and then follow the instructions below.
 
 1. Clone or download the Cardarion repo. If downloaded, extract it into a folder.
