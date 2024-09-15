@@ -18,7 +18,7 @@ https://github.com/JohnathanADrews/HularionExperience/blob/main/docs/1%20-%20Get
 
 Document 2 - Basics - Create a Button 
 
-https://github.com/JohnathanADrews/HularionExperience/blob/main/docs/2%20-%20Button/readme.md
+https://github.com/JohnathanADrews/HularionExperience/blob/main/docs/2%20-%20Create%20a%20Button/readme.md
 
 Document 3 - Clones 
 
