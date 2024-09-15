@@ -10,11 +10,13 @@
 
 ## Using Hularion Experience (HX)
 
+#### The following documentation is for the Hularion Experience framework, but it relies on the Hularion Developer application to illustrate the examples. The first five documents are fairly exhaustive with regards to the basic workings of a presenter, which is the user interface unit.
+
 Document 1 - Getting Started 
 
 https://github.com/JohnathanADrews/HularionExperience/blob/main/docs/1%20-%20GettingStarted/readme.md
 
-Document 2 - Create a Button 
+Document 2 - Basics - Create a Button 
 
 https://github.com/JohnathanADrews/HularionExperience/blob/main/docs/2%20-%20Button/readme.md
 
@@ -32,7 +34,7 @@ https://github.com/JohnathanADrews/HularionExperience/blob/main/docs/5%20-%20Com
 
 ##
 
-The documentation for creating applications is in the Hularion Experience repository, https://github.com/JohnathanADrews/HularionExperience. I am also working on adding some sample projects. In the meantime, feel free to check out the sample Cardarion game. Use the release tag on this repo to get the desktop environment, and then follow the instructions below.
+In addition to the examples in the documentation, there is also a sample application that is the start to strategy card game created in HX called Cardarion. Feel free to check it out. Use the release tag on this repo to get the desktop environment, and then follow the instructions below.
 
 1. Clone or download the Cardarion repo. If downloaded, extract it into a folder.
 2. In Hularion Developer, go to Package->View Sources.
