@@ -10,7 +10,7 @@
 
 ## Using Hularion Experience (HX)
 
-#### The following documentation is for the Hularion Experience framework, but it relies on the Hularion Developer application to illustrate the examples. The first five documents are fairly exhaustive with regards to the basic workings of a presenter, which is the user interface unit.
+#### The following documentation is for the Hularion Experience framework, but it relies on the Hularion Developer application to illustrate the examples. The first two documents give offer a general understanding of the nature of HX and how to use it. The first five documents are fairly exhaustive with regards to the basic workings of a presenter, which is the user interface unit. More advanced topics such as Frames and Packages follow those.
 
 Document 1 - Getting Started 
 
@@ -32,6 +32,11 @@ Document 5 - Components
 
 https://github.com/JohnathanADrews/HularionExperience/blob/main/docs/5%20-%20Components/readme.md
 
+Document 6 - Presenter Frames 
+
+https://github.com/JohnathanADrews/HularionExperience/blob/main/docs/6%20-%20Presenter%20Frames/readme.md
+
+
 ##
 
 In addition to the examples in the documentation, there is also a sample application that is the start to strategy card game created in HX called Cardarion. Feel free to check it out. Use the release tag on this repo to get the desktop environment, and then follow the instructions below.
@@ -44,5 +49,5 @@ In addition to the examples in the documentation, there is also a sample applica
 6. Go to Apps->My Apps. You should see a line item for Cardarion. Click the run button. This should open the Cardarion application in a new tab.
 7. In the game tab, Click the Play A Game button in the center of the window. This should bring up a game board with a draggable map, a minimap, and a hand of cards.
 
-That's it. Cardarion is just the start to a simple web-based card game. It is meant to display the potential HX brings to make complex event-driven applications using HTML, CSS, and javascript within the HX framework.
+
  
