@@ -8,7 +8,11 @@
 &nbsp;
 
 
-## Using Hularion Experience (HX)
+## Hularion Developer
+
+#### Hularion Developer is a sandbox in which to test Hularion Experience (HX) applications. It can run multiple HX applications in a tabbed environment and reload them simply by right-clicking on the tab and selecting Reload, which enables faster development and testing cycles. Hularion Developer can also build packages that are ready for deployment. These builds can then be integrated into desktop or web applications. To get started, download the latest release or run HUlarion Developer in your IDE. Then, follow the documents below. The first two will give you a good overview of the HX application framework.
+
+## Hularion Experience (HX)
 
 #### The following documentation is for the Hularion Experience framework, but it relies on the Hularion Developer application to illustrate the examples. The first two documents give offer a general understanding of the nature of HX and how to use it. The first five documents are fairly exhaustive with regards to the basic workings of a presenter, which is the user interface unit. More advanced topics such as Frames and Packages follow those.
 
