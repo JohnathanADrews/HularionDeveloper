@@ -76,8 +76,8 @@
 
   <ItemGroup>
     <PackageReference Include="CefSharp.Wpf.NETCore" Version="114.2.120" />
-    <PackageReference Include="HularionExperience" Version="3.0.0" />
-    <PackageReference Include="HularionExperience.Embedded" Version="3.0.0" />
+    <PackageReference Include="HularionExperience" Version="3.0.2" />
+    <PackageReference Include="HularionExperience.Embedded" Version="3.0.3" />
     <PackageReference Include="HularionMesh" Version="3.0.0" />
     <PackageReference Include="HularionMesh.Connector.Sqlite" Version="3.0.0" />
     <PackageReference Include="HularionMesh.Serializer.Json" Version="3.0.0" />
