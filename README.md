@@ -36,6 +36,9 @@ Document 6 - Presenter Frames
 
 https://github.com/JohnathanADrews/HularionExperience/blob/main/docs/6%20-%20Presenter%20Frames/readme.md
 
+Document 7 - Script Frames 
+
+https://github.com/JohnathanADrews/HularionExperience/blob/main/docs/7%20-%20Script%20Frames/readme.md
 
 ##
 
