@@ -45,5 +45,10 @@ Article 7 - Script Frames
 https://github.com/JohnathanADrews/HularionExperience/blob/main/docs/7%20-%20Script%20Frames/readme.md
 
 
+Article 8 - Packages
+
+https://github.com/JohnathanADrews/HularionExperience/blob/main/docs/8%20-%20Packages/readme.md
+
+
 
  
