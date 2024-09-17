@@ -135,7 +135,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                 t.detail = response.detail;
                 t.packageKey.html(packageKey);
                 t.packageVersion.html(version);
-                t.packageName.html(response.detail.packageName);
+                t.packageName.html(response.detail.summary.name);
                 t.packageDescription.html(response.detail.summary.description);
                 t.packageBrand.html(response.detail.summary.brand);
                 t.packageProduct.html(response.detail.summary.productKey);
