@@ -85,6 +85,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="HX\HularionExperience\Graphics\" />
     <Folder Include="HX\HularionExperience\ScriptSets\" />
     <Folder Include="Plugin\Project\Response\" />
     <Folder Include="Plugin\Project\Request\" />

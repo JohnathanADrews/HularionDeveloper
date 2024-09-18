@@ -29,7 +29,5 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 	<hx h-plugin-type="nuget" h-plugin-source="C:\dev\nuget" />
 	<hx h-plugin-type="nuget" h-plugin-source="nuget.org" />
 
-	<hx h-graphic="Graphics\TestGraphicBlue.png" h-alias="GraphicBlue" />
-	<hx h-graphic="Graphics\TestGraphicRed.png" h-alias="GraphicRed" />
 	
 </hx>
