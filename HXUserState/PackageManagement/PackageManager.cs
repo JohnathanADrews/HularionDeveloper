@@ -364,10 +364,17 @@ namespace HXUserState.PackageManagement
 
         public HXPartial GetPackage(string packageKey, string version)
         {
-            if (!packageStore.ContainsKey(packageKey) && !LoadPartial(packageKey, version))
+            if (!packageStore.ContainsKey(packageKey) || (packageStore.Where(x => x.Key == version).Count() == 0))
             {
-                return null;
+                if (!LoadPartial(packageKey, version))
+                {
+                    return null;
+                }
             }
+            //if (!packageStore.ContainsKey(packageKey) && !(packageStore.Where(x=>x.Key == version).Count() == 0  && !LoadPartial(packageKey, version))
+            //{
+            //    return null;
+            //}
             var packageVersion = GetPackageVersion(packageKey, version);
             if (packageVersion == null)
             {
