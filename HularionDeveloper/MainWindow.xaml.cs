@@ -28,7 +28,7 @@ namespace HularionDeveloper
 
             var app = (App)Application.Current;
             var home = new Home();
-            var homeViewModel = new HomeViewModel(app.HXApplication, app.HXScreenController);
+            var homeViewModel = new HomeViewModel(app.EmbeddedHXApplication);
             home.DataContext = homeViewModel;
             WindowGrid.Children.Add(home);
 

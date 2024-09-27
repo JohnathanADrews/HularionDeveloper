@@ -27,6 +27,7 @@ using System.Windows.Input;
 using HularionExperience.Embedded;
 using System.Windows.Data;
 using HularionExperience.Plugin.Styles.Routes.Response;
+using HularionExperience.Registration;
 
 namespace HularionDeveloper.ViewModels
 {
@@ -49,19 +50,19 @@ namespace HularionDeveloper.ViewModels
 
         public HXScreenController ScreenController { get; }
 
-        public HularionExperienceApplication Hularion { get; }
+        public EmbeddedHularionExperienceApplication Hularion { get; }
 
         public ObservableCollection<DynamicMenuItem> StyleMenuItems { get; } = new ObservableCollection<DynamicMenuItem>();
 
-        public HomeViewModel(HularionExperienceApplication hularion, HXScreenController screenController)
+        public HomeViewModel(EmbeddedHularionExperienceApplication hularion)
         {
             this.Hularion = hularion;
 
-            Display = new BrowserViewModel(hularion, screenController);
+            Display = new BrowserViewModel(hularion);
 
             BindingOperations.EnableCollectionSynchronization(StyleMenuItems, StyleMenuItems);
 
-            hularion.StyleCategoryRouter.SetCategoryUpdateRouteHandler(request =>
+            hularion.HXApplication.StyleCategoryRouter.SetCategoryUpdateRouteHandler(request =>
             {
                 var response = new StyleCategoryUpdatedNotifyResponse();
 
@@ -76,7 +77,7 @@ namespace HularionDeveloper.ViewModels
                             var optionItem = new DynamicMenuItem() { Name = option };
                             optionItem.Command = new RelayCommand(parameter => true, parameter =>
                             {
-                                hularion.StyleCategoryRouter.ProcessCategoryChanged(hularion.Router, category.Name, option);
+                                hularion.HXApplication.StyleCategoryRouter.ProcessCategoryChanged(hularion.HXApplication.Router, category.Name, option);
                             });
                             categoryItem.Items.Add(optionItem);
                         }
@@ -88,12 +89,12 @@ namespace HularionDeveloper.ViewModels
 
             Refresh = new RelayCommand(parameter => true, parameter =>
             {
-                screenController.ReloadHandler.Handler();
+                Hularion.ScreenController.ReloadHandler.Handler();
             });
 
             ShowDevTools = new RelayCommand(parameter => true, parameter =>
             {
-                screenController.ShowDevToolsHandler.Handler();
+                Hularion.ScreenController.ShowDevToolsHandler.Handler();
             });
         }
 
