@@ -12,7 +12,6 @@
     <None Remove="HX\HularionExperience\Applications\HularionDeveloper.html" />
     <None Remove="HX\HularionExperience\Configuration\DeveloperConfig.html" />
     <None Remove="HX\HularionExperience\HularionExperienceDeveloper.hxproject" />
-    <None Remove="HX\HularionExperience\PresenterSets\Developer\About.html" />
     <None Remove="HX\HularionExperience\PresenterSets\Developer\Applications\ApplicationSummary.html" />
     <None Remove="HX\HularionExperience\PresenterSets\Developer\Applications\ApplicationsView.html" />
     <None Remove="HX\HularionExperience\PresenterSets\Developer\ContextProfile.html" />
@@ -36,6 +35,7 @@
     <None Remove="HX\HularionExperience\PresenterSets\Developer\Projects\PresenterSetInfo.html" />
     <None Remove="HX\HularionExperience\PresenterSets\Developer\Projects\ProjectCreator.html" />
     <None Remove="HX\HularionExperience\PresenterSets\Developer\Projects\ScriptSetInfo.html" />
+    <None Remove="HX\HularionExperience\PresenterSets\Developer\stuff\AboutStuff.html" />
     <None Remove="HX\HularionExperience\PresenterSets\Developer\Test.html" />
   </ItemGroup>
 
@@ -47,7 +47,6 @@
     <EmbeddedResource Include="HX\HularionExperience\Applications\HularionDeveloper.html" />
     <EmbeddedResource Include="HX\HularionExperience\Configuration\DeveloperConfig.html" />
     <EmbeddedResource Include="HX\HularionExperience\HularionExperienceDeveloper.hxproject" />
-    <EmbeddedResource Include="HX\HularionExperience\PresenterSets\Developer\About.html" />
     <EmbeddedResource Include="HX\HularionExperience\PresenterSets\Developer\Applications\ApplicationSummary.html" />
     <EmbeddedResource Include="HX\HularionExperience\PresenterSets\Developer\Applications\ApplicationsView.html" />
     <EmbeddedResource Include="HX\HularionExperience\PresenterSets\Developer\HularionDeveloper.html" />
@@ -55,6 +54,7 @@
     <EmbeddedResource Include="HX\HularionExperience\PresenterSets\Developer\Projects\PresenterSetInfo.html" />
     <EmbeddedResource Include="HX\HularionExperience\PresenterSets\Developer\Projects\ApplicationInfo.html" />
     <EmbeddedResource Include="HX\HularionExperience\PresenterSets\Developer\Projects\ProjectCreator.html" />
+    <EmbeddedResource Include="HX\HularionExperience\PresenterSets\Developer\stuff\AboutStuff.html" />
     <EmbeddedResource Include="HX\HularionExperience\PresenterSets\Developer\Test.html" />
     <EmbeddedResource Include="HX\HularionExperience\PresenterSets\Developer\ContextProfile.html" />
     <EmbeddedResource Include="HX\HularionExperience\PresenterSets\Developer\ContextSelector.html" />
@@ -76,7 +76,7 @@
 
   <ItemGroup>
     <PackageReference Include="CefSharp.Wpf.NETCore" Version="114.2.120" />
-    <PackageReference Include="HularionExperience.Embedded" Version="3.0.12" />
+    <PackageReference Include="HularionExperience.Embedded" Version="3.0.15" />
     <PackageReference Include="HularionMesh" Version="3.0.0" />
     <PackageReference Include="HularionMesh.Connector.Sqlite" Version="3.0.0" />
     <PackageReference Include="HularionMesh.Serializer.Json" Version="3.0.0" />
@@ -84,7 +84,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="HX\HularionExperience\Graphics\" />
     <Folder Include="HX\HularionExperience\ScriptSets\" />
     <Folder Include="Plugin\Project\Response\" />
     <Folder Include="Plugin\Project\Request\" />

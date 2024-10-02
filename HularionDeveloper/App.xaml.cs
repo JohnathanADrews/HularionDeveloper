@@ -76,7 +76,9 @@ namespace HularionDeveloper
             modeStartup.AddCallerAssembly();
             modeStartup.AddAssembly<HXCoreAssemblyReference>();
             modeStartup.AddAssembly<FileDialogAssemblyReference>();
+            modeStartup.AddFilePackageStore(StartModeOption.RELEASE);
             routedPackageStore.PackageStore = modeStartup.GetPackageStore();
+
 
 
         }
